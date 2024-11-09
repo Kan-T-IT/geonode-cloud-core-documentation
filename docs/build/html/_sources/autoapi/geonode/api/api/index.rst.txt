@@ -50,7 +50,7 @@ Module Contents
    Bases: :py:obj:`tastypie.serializers.Serializer`
 
 
-   Custom serializer to post process the api and add counts.
+   Custom serializer to post process the api and add counts
 
 
    .. py:method:: get_resources_counts(options)

@@ -1,0 +1,2273 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geonode_logstash.models &mdash; GeoNode Cloud Core 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoNode Cloud Core
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoNode Cloud Core</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../geonode_logstash.html">geonode_logstash</a></li>
+      <li class="breadcrumb-item active">geonode_logstash.models</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geonode_logstash.models</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#########################################################################</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (C) 2017 OSGeo</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#</span>
+<span class="c1">#########################################################################</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
+<span class="kn">from</span> <span class="nn">django.db</span> <span class="kn">import</span> <span class="n">models</span>
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.utils.translation</span> <span class="kn">import</span> <span class="n">ugettext_noop</span> <span class="k">as</span> <span class="n">_</span>
+<span class="c1"># from django_celery_beat.models import PeriodicTask, IntervalSchedule</span>
+
+<span class="c1"># center = [Lat, Lon]</span>
+<div class="viewcode-block" id="COUNTRIES_GEODB">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.COUNTRIES_GEODB">[docs]</a>
+<span class="n">COUNTRIES_GEODB</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Afghanistan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">33.7680065</span><span class="p">,</span>
+            <span class="mf">66.2385139</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;AFG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AF&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Angola&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">11.8775768</span><span class="p">,</span>
+            <span class="mf">17.5691241</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;AGO&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Anguilla&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">18.1954947</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">63.0750234</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;AIA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AI&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Albania&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">41.000028</span><span class="p">,</span>
+            <span class="mf">19.9999619</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ALB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AL&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Andorra&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">42.5407167</span><span class="p">,</span>
+            <span class="mf">1.5732033</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;AND&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AD&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;United Arab Emirates&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">24.0002488</span><span class="p">,</span>
+            <span class="mf">53.9994829</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ARE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Argentina&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">34.9964963</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">64.9672817</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ARG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Armenia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">40.7696272</span><span class="p">,</span>
+            <span class="mf">44.6736646</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ARM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;American Samoa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">14.289304</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">170.692511</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ASM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Antigua and Barbuda&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">17.079128</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">61.8222516</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ATG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Australia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">24.7761086</span><span class="p">,</span>
+            <span class="mf">134.755</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;AUS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Austria&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">47.2000338</span><span class="p">,</span>
+            <span class="mf">13.199959</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;AUT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Azerbaijan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">40.3936294</span><span class="p">,</span>
+            <span class="mf">47.7872508</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;AZE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;AZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Burundi&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">3.3634357</span><span class="p">,</span>
+            <span class="mf">29.8870575</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BDI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BI&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Belgium&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">50.6402809</span><span class="p">,</span>
+            <span class="mf">4.6667145</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BEL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Benin&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">9.5293472</span><span class="p">,</span>
+            <span class="mf">2.2584408</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BEN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BJ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Burkina Faso&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">12.0753083</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">1.6880314</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BFA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BF&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bangladesh&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">24.4768783</span><span class="p">,</span>
+            <span class="mf">90.2932426</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BGD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BD&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bulgaria&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">42.6073975</span><span class="p">,</span>
+            <span class="mf">25.4856617</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BGR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bahrain&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">26.1551249</span><span class="p">,</span>
+            <span class="mf">50.5344606</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BHR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BH&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bahamas&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">24.7736546</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">78.0000547</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BHS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bosnia and Herzegovina&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">44.3053476</span><span class="p">,</span>
+            <span class="mf">17.5961467</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BIH&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Belarus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">53.4250605</span><span class="p">,</span>
+            <span class="mf">27.6971358</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BLR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Belize&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">16.8259793</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">88.7600927</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BLZ&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bermuda&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">32.3018217</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">64.7603583</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BMU&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Brazil&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">10.3333333</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">53.2</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BRA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Barbados&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">13.1500331</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">59.5250305</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BRB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BB&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Brunei Darussalam&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">4.4137155</span><span class="p">,</span>
+            <span class="mf">114.5653908</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BRN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Bhutan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">27.549511</span><span class="p">,</span>
+            <span class="mf">90.5119273</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BTN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Botswana&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">23.1681782</span><span class="p">,</span>
+            <span class="mf">24.5928742</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;BWA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;BW&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Central African Republic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">7.0323598</span><span class="p">,</span>
+            <span class="mf">19.9981227</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CAF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CF&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Canada&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">61.0666922</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">107.9917071</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CAN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Switzerland&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">46.7985624</span><span class="p">,</span>
+            <span class="mf">8.2319736</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CHE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CH&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Chile&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">31.7613365</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">71.3187697</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CHL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CL&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;China&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">35.000074</span><span class="p">,</span>
+            <span class="mf">104.999927</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CHN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cameroon&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">4.6125522</span><span class="p">,</span>
+            <span class="mf">13.1535811</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CMR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Congo&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">0.7264327</span><span class="p">,</span>
+            <span class="mf">15.6419155</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;COG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cook Islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">16.0492781</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">160.3554851</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;COK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CK&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Colombia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">2.8894434</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">73.783892</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;COL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Comoros&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">12.2045176</span><span class="p">,</span>
+            <span class="mf">44.2832964</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;COM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cabo Verde&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">16.0000552</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">24.0083947</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CPV&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CV&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Costa Rica&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">10.2735633</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">84.0739102</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CRI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cuba&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">23.0131338</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">80.8328748</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CUB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cayman Islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">19.5417212</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">80.5667132</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CYM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cyprus&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">34.9823018</span><span class="p">,</span>
+            <span class="mf">33.1451285</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CYP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Czechia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">49.8167003</span><span class="p">,</span>
+            <span class="mf">15.4749544</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;CZE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;CZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Germany&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">51.0834196</span><span class="p">,</span>
+            <span class="mf">10.4234469</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;DEU&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;DE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Djibouti&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">11.8145966</span><span class="p">,</span>
+            <span class="mf">42.8453061</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;DJI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;DJ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Dominica&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">19.0974031</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">70.3028026</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;DMA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;DM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Denmark&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">55.670249</span><span class="p">,</span>
+            <span class="mf">10.3333283</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;DNK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;DK&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Dominican Republic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">19.0974031</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">70.3028026</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;DOM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;DO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Algeria&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">28.0000272</span><span class="p">,</span>
+            <span class="mf">2.9999825</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;DZA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;DZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ecuador&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">1.3397668</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">79.3666965</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ECU&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;EC&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Egypt&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">26.2540493</span><span class="p">,</span>
+            <span class="mf">29.2675469</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;EGY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;EG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Eritrea&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">15.9500319</span><span class="p">,</span>
+            <span class="mf">37.9999668</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ERI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ER&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Spain&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">39.3262345</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">4.8380649</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ESP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ES&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Estonia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">58.7523778</span><span class="p">,</span>
+            <span class="mf">25.3319078</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;EST&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;EE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ethiopia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">10.2116702</span><span class="p">,</span>
+            <span class="mf">38.6521203</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ETH&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ET&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Finland&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">63.2467777</span><span class="p">,</span>
+            <span class="mf">25.9209164</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;FIN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;FI&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Fiji&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">18.1239696</span><span class="p">,</span>
+            <span class="mf">179.0122737</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;FJI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;FJ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Falkland Islands (Malvinas)&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">51.9666424</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">59.5500387</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;FLK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;FK&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;France&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">46.603354</span><span class="p">,</span>
+            <span class="mf">1.8883335</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;FRA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;FR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Faroe Islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">62.0448724</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">7.0322972</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;FRO&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;FO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Micronesia, Federated States of&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">5.5600565</span><span class="p">,</span>
+            <span class="mf">150.1982846</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;FSM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;FM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Gabon&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">0.8999695</span><span class="p">,</span>
+            <span class="mf">11.6899699</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GAB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;United Kingdom&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">54.7023545</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">3.2765753</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GBR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GB&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Georgia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">41.6809707</span><span class="p">,</span>
+            <span class="mf">44.0287382</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GEO&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guernsey&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">49.580437</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.484854</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GGY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ghana&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">8.0300284</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">1.0800271</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GHA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GH&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Gibraltar&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">36.10674695</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">5.33527718348356</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GIB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GI&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guinea&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">10.7226226</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">10.7083587</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GIN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Gambia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">13.470062</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">15.4900464</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GMB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guinea-Bissau&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">12.100035</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">14.9000214</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GNB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GW&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Equatorial Guinea&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">1.613172</span><span class="p">,</span>
+            <span class="mf">10.5170357</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GNQ&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GQ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Greece&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">38.9953683</span><span class="p">,</span>
+            <span class="mf">21.9877132</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GRC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Grenada&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">12.1360374</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">61.6904045</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GRD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GD&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Greenland&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">77.6192349</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">42.8125967</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GRL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GL&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guatemala&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">15.6356088</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">89.8988087</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GTM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guam&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">13.445476</span><span class="p">,</span>
+            <span class="mf">144.76507652909</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GUM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Guyana&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">4.8417097</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">58.6416891</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;GUY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Honduras&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">15.2572432</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">86.0755145</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;HND&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;HN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Croatia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">45.5643442</span><span class="p">,</span>
+            <span class="mf">17.0118954</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;HRV&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;HR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Haiti&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">19.1399952</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">72.3570972</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;HTI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;HT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Hungary&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">47.1817585</span><span class="p">,</span>
+            <span class="mf">19.5060937</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;HUN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;HU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Indonesia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">2.4833826</span><span class="p">,</span>
+            <span class="mf">117.8902853</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;IDN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ID&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Isle of Man&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">54.1936805</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">4.5591148</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;IMN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;India&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">22.3511148</span><span class="p">,</span>
+            <span class="mf">78.6677428</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;IND&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;British Indian Ocean Territory&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">6.4157192</span><span class="p">,</span>
+            <span class="mf">72.1173961</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;IOT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ireland&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">52.865196</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">7.9794599</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;IRL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Iran, Islamic Republic of&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">32.9407495</span><span class="p">,</span>
+            <span class="mf">52.9471344</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;IRN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Iraq&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">33.0955793</span><span class="p">,</span>
+            <span class="mf">44.1749775</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;IRQ&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IQ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Iceland&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">64.9841821</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">18.1059013</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ISL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Israel&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">30.8760272</span><span class="p">,</span>
+            <span class="mf">35.0015196</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ISR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IL&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Italy&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">42.6384261</span><span class="p">,</span>
+            <span class="mf">12.674297</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ITA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;IT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Jamaica&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">18.1850507</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">77.3947693</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;JAM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;JM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Jersey&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">49.2214561</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.1358386</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;JEY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;JE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Jordan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">31.1667049</span><span class="p">,</span>
+            <span class="mf">36.941628</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;JOR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;JO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Japan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">36.5748441</span><span class="p">,</span>
+            <span class="mf">139.2394179</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;JPN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;JP&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kazakhstan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">47.2286086</span><span class="p">,</span>
+            <span class="mf">65.2093197</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;KAZ&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kenya&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">1.4419683</span><span class="p">,</span>
+            <span class="mf">38.4313975</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;KEN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kyrgyzstan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">41.5089324</span><span class="p">,</span>
+            <span class="mf">74.724091</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;KGZ&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Cambodia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">13.5066394</span><span class="p">,</span>
+            <span class="mf">104.869423</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;KHM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KH&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kiribati&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">0.4483283</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">171.6645388</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;KIR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KI&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Saint Kitts and Nevis&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">17.3462278</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">62.7687277</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;KNA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Korea, Republic of&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">36.5581914</span><span class="p">,</span>
+            <span class="mf">127.9408564</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;KOR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Kuwait&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">29.2733964</span><span class="p">,</span>
+            <span class="mf">47.4979476</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;KWT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KW&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lao People&#39;s Democratic Republic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">20.0171109</span><span class="p">,</span>
+            <span class="mf">103.378253</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LAO&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lebanon&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">33.8750629</span><span class="p">,</span>
+            <span class="mf">35.843409</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LBN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LB&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Liberia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">5.7499721</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">9.3658524</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LBR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Libya&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">26.8234472</span><span class="p">,</span>
+            <span class="mf">18.1236723</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LBY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Saint Lucia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">13.8250489</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">60.975036</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LCA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LC&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Liechtenstein&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">47.1416307</span><span class="p">,</span>
+            <span class="mf">9.5531527</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LIE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LI&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sri Lanka&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">7.5554942</span><span class="p">,</span>
+            <span class="mf">80.7137847</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LKA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LK&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lesotho&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">29.6039267</span><span class="p">,</span>
+            <span class="mf">28.3350193</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LSO&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Lithuania&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">55.3500003</span><span class="p">,</span>
+            <span class="mf">23.7499997</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LTU&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Luxembourg&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">49.8158683</span><span class="p">,</span>
+            <span class="mf">6.1296751</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LUX&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Latvia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">56.8406494</span><span class="p">,</span>
+            <span class="mf">24.7537645</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;LVA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;LV&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Morocco&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">31.1728205</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">7.3362482</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MAR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Monaco&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">43.7323492</span><span class="p">,</span>
+            <span class="mf">7.4276832</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MCO&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MC&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Moldova, Republic of&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">47.286747</span><span class="p">,</span>
+            <span class="mf">28.5110236</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MDA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MD&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Madagascar&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">18.9249604</span><span class="p">,</span>
+            <span class="mf">46.4416422</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MDG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Maldives&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">4.7064352</span><span class="p">,</span>
+            <span class="mf">73.3287853</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MDV&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MV&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Mexico&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">22.5000485</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">100.0000375</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MEX&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MX&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Marshall Islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">6.9518742</span><span class="p">,</span>
+            <span class="mf">170.9985095</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MHL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MH&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;North Macedonia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">41.6171214</span><span class="p">,</span>
+            <span class="mf">21.7168387</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MKD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MK&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Mali&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">16.3700359</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">2.2900239</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MLI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ML&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Malta&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">35.8885993</span><span class="p">,</span>
+            <span class="mf">14.4476911</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MLT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Myanmar&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">17.1750495</span><span class="p">,</span>
+            <span class="mf">95.9999652</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MMR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Montenegro&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">42.7728491</span><span class="p">,</span>
+            <span class="mf">19.2408586</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MNE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ME&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Mongolia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">46.8250388</span><span class="p">,</span>
+            <span class="mf">103.8499736</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MNG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Mozambique&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">19.302233</span><span class="p">,</span>
+            <span class="mf">34.9144977</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MOZ&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Mauritania&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">20.2540382</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">9.2399263</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MRT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Montserrat&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">16.7417041</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">62.1916844</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MSR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Mauritius&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">20.2759451</span><span class="p">,</span>
+            <span class="mf">57.5703566</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MUS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Malawi&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">13.2687204</span><span class="p">,</span>
+            <span class="mf">33.9301963</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MWI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MW&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Malaysia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">4.5693754</span><span class="p">,</span>
+            <span class="mf">102.2656823</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;MYS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;MY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Namibia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">23.2335499</span><span class="p">,</span>
+            <span class="mf">17.3231107</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NAM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;New Caledonia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">20.4542886</span><span class="p">,</span>
+            <span class="mf">164.55660583078</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NCL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NC&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Niger&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">17.7356214</span><span class="p">,</span>
+            <span class="mf">9.3238432</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NER&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Norfolk Island&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">25.0657719</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">130.1017823</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NFK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NF&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Nigeria&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">9.6000359</span><span class="p">,</span>
+            <span class="mf">7.9999721</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NGA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Nicaragua&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">12.3724928</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">84.8700308</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NIC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NI&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Niue&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">19.0536414</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">169.8613411</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NIU&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Netherlands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">52.5001698</span><span class="p">,</span>
+            <span class="mf">5.7480821</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NLD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NL&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Norway&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">60.5000209</span><span class="p">,</span>
+            <span class="mf">9.0999715</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NOR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Nepal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">28.1083929</span><span class="p">,</span>
+            <span class="mf">84.0917139</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NPL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NP&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Nauru&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">0.5252306</span><span class="p">,</span>
+            <span class="mf">166.9324426</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NRU&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;New Zealand&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">41.5000831</span><span class="p">,</span>
+            <span class="mf">172.8344077</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;NZL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;NZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Oman&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">21.0000287</span><span class="p">,</span>
+            <span class="mf">57.0036901</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;OMN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;OM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pakistan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">30.3308401</span><span class="p">,</span>
+            <span class="mf">71.247499</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PAK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PK&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Panama&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">8.3096067</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">81.3066246</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PAN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Pitcairn&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">25.0657719</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">130.1017823</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PCN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Peru&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">6.8699697</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">75.0458515</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PER&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Philippines&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">12.7503486</span><span class="p">,</span>
+            <span class="mf">122.7312101</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PHL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PH&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Palau&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">6.097367</span><span class="p">,</span>
+            <span class="mf">133.313631</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PLW&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PW&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Papua New Guinea&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">5.6816069</span><span class="p">,</span>
+            <span class="mf">144.2489081</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PNG&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Poland&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">52.215933</span><span class="p">,</span>
+            <span class="mf">19.134422</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;POL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PL&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Korea, Democratic People&#39;s Republic of&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">40.3736611</span><span class="p">,</span>
+            <span class="mf">127.0870417</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PRK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;KP&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Portugal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">40.033265</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">7.8896263</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PRT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Paraguay&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">23.3165935</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">58.1693445</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PRY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Palestine, State of&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">30.8760272</span><span class="p">,</span>
+            <span class="mf">35.0015196</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;PSE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;PS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Qatar&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">25.3336984</span><span class="p">,</span>
+            <span class="mf">51.2295295</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;QAT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;QA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Romania&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">45.9852129</span><span class="p">,</span>
+            <span class="mf">24.6859225</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ROU&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;RO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Russian Federation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">64.6863136</span><span class="p">,</span>
+            <span class="mf">97.7453061</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;RUS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;RU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Rwanda&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">1.9646631</span><span class="p">,</span>
+            <span class="mf">30.0644358</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;RWA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;RW&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Saudi Arabia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">25.6242618</span><span class="p">,</span>
+            <span class="mf">42.3528328</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SAU&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sudan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">14.5844444</span><span class="p">,</span>
+            <span class="mf">29.4917691</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SDN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SD&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Senegal&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">14.4750607</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">14.4529612</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SEN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Singapore&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">1.357107</span><span class="p">,</span>
+            <span class="mf">103.8194992</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SGP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;South Georgia and the South Sandwich Islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">54.8432857</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">35.8090698</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SGS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;GS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Saint Helena, Ascension and Tristan da Cunha&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">37.2465</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">12.4870384875</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SHN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SH&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Solomon Islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">9.7354344</span><span class="p">,</span>
+            <span class="mf">162.8288542</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SLB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SB&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sierra Leone&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">8.6400349</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">11.8400269</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SLE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SL&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;El Salvador&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">13.8000382</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">88.9140683</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SLV&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SV&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;San Marino&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">43.9458623</span><span class="p">,</span>
+            <span class="mf">12.458306</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SMR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Somalia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">8.3676771</span><span class="p">,</span>
+            <span class="mf">49.083416</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SOM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Serbia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">44.1534121</span><span class="p">,</span>
+            <span class="mf">20.55144</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SRB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;RS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;South Sudan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">7.8699431</span><span class="p">,</span>
+            <span class="mf">29.6667897</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SSD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sao Tome and Principe&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">0.8875498</span><span class="p">,</span>
+            <span class="mf">6.9648718</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;STP&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ST&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Suriname&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">4.1413025</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">56.0771187</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SUR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Slovakia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">48.7411522</span><span class="p">,</span>
+            <span class="mf">19.4528646</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SVK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SK&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Slovenia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">45.8133113</span><span class="p">,</span>
+            <span class="mf">14.4808369</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SVN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SI&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Sweden&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">59.6749712</span><span class="p">,</span>
+            <span class="mf">14.5208584</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SWE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Eswatini&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">26.5624806</span><span class="p">,</span>
+            <span class="mf">31.3991317</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SWZ&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Seychelles&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">4.6574977</span><span class="p">,</span>
+            <span class="mf">55.4540146</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SYC&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SC&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Syrian Arab Republic&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">34.6401861</span><span class="p">,</span>
+            <span class="mf">39.0494106</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;SYR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;SY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Turks and Caicos Islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">21.7214683</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">71.6201783</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TCA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TC&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Chad&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">15.6134137</span><span class="p">,</span>
+            <span class="mf">19.0156172</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TCD&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TD&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Togo&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">8.7800265</span><span class="p">,</span>
+            <span class="mf">1.0199765</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TGO&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Thailand&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">14.8971921</span><span class="p">,</span>
+            <span class="mf">100.83273</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;THA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TH&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tajikistan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">38.6281733</span><span class="p">,</span>
+            <span class="mf">70.8156541</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TJK&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TJ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tokelau&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">9.1676396</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">171.8196878</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TKL&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TK&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Turkmenistan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">39.3763807</span><span class="p">,</span>
+            <span class="mf">59.3924609</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TKM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Timor-Leste&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">8.5151979</span><span class="p">,</span>
+            <span class="mf">125.8375756</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TLS&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TL&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tonga&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">19.9160819</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">175.2026424</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TON&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TO&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Trinidad and Tobago&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">10.8677845</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">60.9821067</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TTO&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TT&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tunisia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">33.8439408</span><span class="p">,</span>
+            <span class="mf">9.400138</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TUN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Turkey&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">38.9597594</span><span class="p">,</span>
+            <span class="mf">34.9249653</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TUR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TR&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tuvalu&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">7.768959</span><span class="p">,</span>
+            <span class="mf">178.1167698</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TUV&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TV&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Tanzania, United Republic of&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">6.5247123</span><span class="p">,</span>
+            <span class="mf">35.7878438</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;TZA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;TZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Uganda&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">1.5333554</span><span class="p">,</span>
+            <span class="mf">32.2166578</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;UGA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;UG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Ukraine&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">49.4871968</span><span class="p">,</span>
+            <span class="mf">31.2718321</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;UKR&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;UA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;United States Minor Outlying Islands&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">6.4295092</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">162.407309978782</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;UMI&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;UM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Uruguay&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">32.8755548</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">56.0201525</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;URY&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;UY&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;United States&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">39.7837304</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">100.4458825</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;USA&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;US&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Uzbekistan&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">41.32373</span><span class="p">,</span>
+            <span class="mf">63.9528098</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;UZB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;UZ&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Saint Vincent and the Grenadines&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">12.90447</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">61.2765569</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;VCT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;VC&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Venezuela, Bolivarian Republic of&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">8.0018709</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">66.1109318</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;VEN&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;VE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Virgin Islands, British&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">18.4024395</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">64.5661642</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;VGB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;VG&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Viet Nam&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">13.2904027</span><span class="p">,</span>
+            <span class="mf">108.4265113</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;VNM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;VN&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Vanuatu&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">16.5255069</span><span class="p">,</span>
+            <span class="mf">168.1069154</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;VUT&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;VU&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Wallis and Futuna&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">13.28536975</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">176.187268263577</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;WLF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;WF&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Samoa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">13.7693895</span><span class="p">,</span>
+            <span class="o">-</span><span class="mf">172.1200508</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;WSM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;WS&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Yemen&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="mf">16.3471243</span><span class="p">,</span>
+            <span class="mf">47.8915271</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;YEM&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;YE&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;South Africa&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">28.8166236</span><span class="p">,</span>
+            <span class="mf">24.991639</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ZAF&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ZA&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Zambia&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">14.5186239</span><span class="p">,</span>
+            <span class="mf">27.5599164</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ZMB&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ZM&quot;</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;country.display_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Zimbabwe&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.center&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="o">-</span><span class="mf">18.4554963</span><span class="p">,</span>
+            <span class="mf">29.7468414</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;country.iso_3&quot;</span><span class="p">:</span> <span class="s2">&quot;ZWE&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;country.iso_2&quot;</span><span class="p">:</span> <span class="s2">&quot;ZW&quot;</span>
+    <span class="p">}</span>
+<span class="p">]</span></div>
+
+
+
+<div class="viewcode-block" id="CentralizedServer">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer">[docs]</a>
+<span class="k">class</span> <span class="nc">CentralizedServer</span><span class="p">(</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Centralized Server for monitoring/analytics metrics data</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="CentralizedServer.host">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.host">[docs]</a>
+    <span class="n">host</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">255</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Centralized Server IP address/Host name.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.port">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.port">[docs]</a>
+    <span class="n">port</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Centralized Server TCP port number.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.local_ip">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.local_ip">[docs]</a>
+    <span class="n">local_ip</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">GenericIPAddressField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">protocol</span><span class="o">=</span><span class="s1">&#39;ipv4&#39;</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Local Server IP address.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.interval">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.interval">[docs]</a>
+    <span class="n">interval</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">3600</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Data aggregation time interval (in seconds).&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.db_path">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.db_path">[docs]</a>
+    <span class="n">db_path</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">CharField</span><span class="p">(</span>
+        <span class="n">max_length</span><span class="o">=</span><span class="mi">500</span><span class="p">,</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="s2">&quot;logstash_</span><span class="si">{}</span><span class="s2">.db&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">())[:</span><span class="mi">8</span><span class="p">]),</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;The local SQLite database to cache log events between emitting and &quot;</span>
+                    <span class="s2">&quot;transmission to the Logstash server. &quot;</span>
+                    <span class="s2">&quot;This way log events are cached even across process restarts (and crashes).&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.socket_timeout">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.socket_timeout">[docs]</a>
+    <span class="n">socket_timeout</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Timeout in seconds for TCP connections.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.queue_check_interval">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.queue_check_interval">[docs]</a>
+    <span class="n">queue_check_interval</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Interval in seconds to check the internal queue for new messages to be cached in the database.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.queue_events_flush_interval">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.queue_events_flush_interval">[docs]</a>
+    <span class="n">queue_events_flush_interval</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Interval in seconds to send cached events from the database to Logstash.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.queue_events_flush_count">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.queue_events_flush_count">[docs]</a>
+    <span class="n">queue_events_flush_count</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Count of cached events to send from the database to Logstash; &quot;</span>
+                    <span class="s2">&quot;events are sent to Logstash whenever QUEUED_EVENTS_FLUSH_COUNT or &quot;</span>
+                    <span class="s2">&quot;QUEUED_EVENTS_FLUSH_INTERVAL is reached, whatever happens first.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.queue_events_batch_size">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.queue_events_batch_size">[docs]</a>
+    <span class="n">queue_events_batch_size</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">IntegerField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Maximum number of events to be sent to Logstash in one batch. &quot;</span>
+                    <span class="s2">&quot;Depending on the transport, this usually means a new connection to the Logstash is &quot;</span>
+                    <span class="s2">&quot;established for the event batch.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.logstash_db_timeout">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.logstash_db_timeout">[docs]</a>
+    <span class="n">logstash_db_timeout</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">FloatField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">default</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Timeout in seconds to &#39;connect&#39; the SQLite database.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.last_successful_deliver">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.last_successful_deliver">[docs]</a>
+    <span class="n">last_successful_deliver</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Timestamp of the last successful deliver.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.next_scheduled_deliver">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.next_scheduled_deliver">[docs]</a>
+    <span class="n">next_scheduled_deliver</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Timestamp of the next scheduled deliver.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+<div class="viewcode-block" id="CentralizedServer.last_failed_deliver">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.last_failed_deliver">[docs]</a>
+    <span class="n">last_failed_deliver</span> <span class="o">=</span> <span class="n">models</span><span class="o">.</span><span class="n">DateTimeField</span><span class="p">(</span>
+        <span class="n">null</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">blank</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">help_text</span><span class="o">=</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;Timestamp of the last failed deliver.&quot;</span><span class="p">)</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CentralizedServer.save">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/models/index.html#geonode_logstash.models.CentralizedServer.save">[docs]</a>
+    <span class="k">def</span> <span class="nf">save</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Overriding the &#39;save&#39; super method.</span>
+<span class="sd">        We have to sync PeriodicTask with CentralizedServer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self.sync_periodic_task()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CentralizedServer</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
+
+
+    <span class="c1"># def sync_periodic_task(self):</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Sync django_celery_beat</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     if settings.MONITORING_ENABLED and settings.USER_ANALYTICS_ENABLED:</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             i, _ci = IntervalSchedule.objects.get_or_create(</span>
+    <span class="c1">#                 every=self.interval, period=IntervalSchedule.SECONDS</span>
+    <span class="c1">#             )</span>
+    <span class="c1">#         except IntervalSchedule.MultipleObjectsReturned:</span>
+    <span class="c1">#             i = IntervalSchedule.objects.filter(</span>
+    <span class="c1">#                 every=self.interval, period=IntervalSchedule.SECONDS</span>
+    <span class="c1">#             ).first()</span>
+    <span class="c1">#         try:</span>
+    <span class="c1">#             pt, _cpt = PeriodicTask.objects.get_or_create(</span>
+    <span class="c1">#                 name=&quot;dispatch-metrics-task&quot;,</span>
+    <span class="c1">#                 task=&quot;geonode_logstash.tasks.dispatch_metrics&quot;,</span>
+    <span class="c1">#             )</span>
+    <span class="c1">#         except PeriodicTask.MultipleObjectsReturned:</span>
+    <span class="c1">#             pt = PeriodicTask.objects.filter(</span>
+    <span class="c1">#                 name=&quot;dispatch-metrics-task&quot;,</span>
+    <span class="c1">#                 task=&quot;geonode_logstash.tasks.dispatch_metrics&quot;,</span>
+    <span class="c1">#             ).first()</span>
+    <span class="c1">#         pt.interval = i</span>
+    <span class="c1">#         pt.enabled = True</span>
+    <span class="c1">#         pt.save()</span>
+    <span class="c1">#     else:</span>
+    <span class="c1">#         # When MONITORING_ENABLED=True and USER_ANALYTICS_ENABLED=False we have to disable the task</span>
+    <span class="c1">#         pts = PeriodicTask.objects.filter(</span>
+    <span class="c1">#             name=&quot;dispatch-metrics-task&quot;,</span>
+    <span class="c1">#             task=&quot;geonode_logstash.tasks.dispatch_metrics&quot;,</span>
+    <span class="c1">#         )</span>
+    <span class="c1">#         for pt in pts:</span>
+    <span class="c1">#             pt.enabled = False</span>
+    <span class="c1">#             pt.save()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Kan Territory &amp; IT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

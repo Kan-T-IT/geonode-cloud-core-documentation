@@ -1,0 +1,50 @@
+geonode_logstash.tests
+======================
+
+.. py:module:: geonode_logstash.tests
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   geonode_logstash.tests.logger
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   geonode_logstash.tests.GeonodeLogstashTest
+
+
+Module Contents
+---------------
+
+.. py:data:: logger
+
+.. py:class:: GeonodeLogstashTest
+
+   Bases: :py:obj:`geonode.tests.base.GeoNodeBaseTestSupport`
+
+
+   Test the geonode_logstash application.
+
+
+   .. py:attribute:: resources
+
+
+   .. py:attribute:: ua_families
+
+
+   .. py:method:: setUp()
+
+
+   .. py:method:: test_get_message()
+
+
+   .. py:method:: test_format_record()
+
+

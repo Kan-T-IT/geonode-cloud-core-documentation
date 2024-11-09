@@ -9,11 +9,11 @@ Attributes
 
 .. autoapisummary::
 
-   setup.current_directory
+   setup.README
 
 
 Module Contents
 ---------------
 
-.. py:data:: current_directory
+.. py:data:: README
 

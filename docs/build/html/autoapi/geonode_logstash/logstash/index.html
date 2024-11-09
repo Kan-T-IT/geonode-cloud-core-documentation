@@ -1,0 +1,509 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geonode_logstash.logstash &mdash; GeoNode Cloud Core 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="geonode_logstash.models" href="../models/index.html" />
+    <link rel="prev" title="geonode_logstash.admin" href="../admin/index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            GeoNode Cloud Core
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../ec2/index.html">ec2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../setup/index.html">setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../tasks/index.html">tasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../manage/index.html">manage</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../upload/index.html">upload</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../fabfile/index.html">fabfile</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../geonode/index.html">geonode</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../changepw/index.html">changepw</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../demo_site/index.html">demo_site</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gn24_to_24/index.html">gn24_to_24</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../gn20_to_24/index.html">gn20_to_24</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../index.html">geonode_logstash</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="../index.html#subpackages">Subpackages</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="../index.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="../admin/index.html">geonode_logstash.admin</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">geonode_logstash.logstash</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../models/index.html">geonode_logstash.models</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../tasks/index.html">geonode_logstash.tasks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../tests/index.html">geonode_logstash.tests</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#attributes">Attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#classes">Classes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../index.html#package-contents">Package Contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">GeoNode Cloud Core</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">API Reference</a></li>
+          <li class="breadcrumb-item"><a href="../index.html">geonode_logstash</a></li>
+      <li class="breadcrumb-item active">geonode_logstash.logstash</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/autoapi/geonode_logstash/logstash/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-geonode_logstash.logstash">
+<span id="geonode-logstash-logstash"></span><h1>geonode_logstash.logstash<a class="headerlink" href="#module-geonode_logstash.logstash" title="Link to this heading"></a></h1>
+<section id="attributes">
+<h2>Attributes<a class="headerlink" href="#attributes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geonode_logstash.logstash.log" title="geonode_logstash.logstash.log"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geonode_logstash.logstash.IS_ENABLED" title="geonode_logstash.logstash.IS_ENABLED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IS_ENABLED</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geonode_logstash.logstash.GZIP_COMPRESSED" title="geonode_logstash.logstash.GZIP_COMPRESSED"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GZIP_COMPRESSED</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="geonode_logstash.logstash.DATA_TYPES_MAP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DATA_TYPES_MAP</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geonode_logstash.logstash.CUSTOM_DATA_TYPES_MAP" title="geonode_logstash.logstash.CUSTOM_DATA_TYPES_MAP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">CUSTOM_DATA_TYPES_MAP</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#id0" title="geonode_logstash.logstash.DATA_TYPES_MAP"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DATA_TYPES_MAP</span></code></a></p></td>
+<td><p></p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="classes">
+<h2>Classes<a class="headerlink" href="#classes" title="Link to this heading"></a></h2>
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geonode_logstash.logstash.LogstashDispatcher" title="geonode_logstash.logstash.LogstashDispatcher"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LogstashDispatcher</span></code></a></p></td>
+<td><p>Dispatcher of GeoNode metric data for Logstash server</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler" title="geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeonodeAsynchronousLogstashHandler</span></code></a></p></td>
+<td><p>Extends AsynchronousLogstashHandler to allow gzip compression</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geonode_logstash.logstash.GeonodeLogstashFormatter" title="geonode_logstash.logstash.GeonodeLogstashFormatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeonodeLogstashFormatter</span></code></a></p></td>
+<td><p>Extends LogstashFormatter to allow gzip compression</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geonode_logstash.logstash.GeonodeTcpTransport" title="geonode_logstash.logstash.GeonodeTcpTransport"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeonodeTcpTransport</span></code></a></p></td>
+<td><p>Extends TcpTransport to avoid loss of messages</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#geonode_logstash.logstash.GeonodeLogProcessingWorker" title="geonode_logstash.logstash.GeonodeLogProcessingWorker"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeonodeLogProcessingWorker</span></code></a></p></td>
+<td><p>Extends LogProcessingWorker to use GeonodeDatabaseCache</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#geonode_logstash.logstash.GeonodeDatabaseCache" title="geonode_logstash.logstash.GeonodeDatabaseCache"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GeonodeDatabaseCache</span></code></a></p></td>
+<td><p>Extends DatabaseCache to have more method</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="module-contents">
+<h2>Module Contents<a class="headerlink" href="#module-contents" title="Link to this heading"></a></h2>
+<dl class="py data">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.log">
+<span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">log</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#log"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.log" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.IS_ENABLED">
+<span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">IS_ENABLED</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#IS_ENABLED"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.IS_ENABLED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GZIP_COMPRESSED">
+<span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">GZIP_COMPRESSED</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GZIP_COMPRESSED"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GZIP_COMPRESSED" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.DATA_TYPES_MAP">
+<span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">DATA_TYPES_MAP</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#DATA_TYPES_MAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.DATA_TYPES_MAP" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.CUSTOM_DATA_TYPES_MAP">
+<span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">CUSTOM_DATA_TYPES_MAP</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#CUSTOM_DATA_TYPES_MAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.CUSTOM_DATA_TYPES_MAP" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">DATA_TYPES_MAP</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#DATA_TYPES_MAP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">LogstashDispatcher</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Dispatcher of GeoNode metric data for Logstash server</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._centralized_server">
+<span class="sig-name descname"><span class="pre">_centralized_server</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._centralized_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._centralized_server" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._logger">
+<span class="sig-name descname"><span class="pre">_logger</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._logger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._logger" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._handler">
+<span class="sig-name descname"><span class="pre">_handler</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._handler" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._interval">
+<span class="sig-name descname"><span class="pre">_interval</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></em><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._interval" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._collector">
+<span class="sig-name descname"><span class="pre">_collector</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._collector"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._collector" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._init_server">
+<span class="sig-name descname"><span class="pre">_init_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._init_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._init_server" title="Link to this definition"></a></dt>
+<dd><p>Initializing Dispatcher with basic information
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._get_centralized_server">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_centralized_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._get_centralized_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._get_centralized_server" title="Link to this definition"></a></dt>
+<dd><p>Get the Centralized Server instance
+:return: Centralized Server</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher.get_socket_timeout">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_socket_timeout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher.get_socket_timeout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher.get_socket_timeout" title="Link to this definition"></a></dt>
+<dd><p>Configuring the SOCKET_TIMEOUT from the model
+:return: SOCKET_TIMEOUT</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher.get_queue_check_interval">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_queue_check_interval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher.get_queue_check_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher.get_queue_check_interval" title="Link to this definition"></a></dt>
+<dd><p>Configuring the QUEUE_CHECK_INTERVAL from the model
+:return: QUEUE_CHECK_INTERVAL</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher.get_queue_events_flush_interval">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_queue_events_flush_interval</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher.get_queue_events_flush_interval"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher.get_queue_events_flush_interval" title="Link to this definition"></a></dt>
+<dd><p>Configuring the QUEUED_EVENTS_FLUSH_INTERVAL from the model
+:return: QUEUED_EVENTS_FLUSH_INTERVAL</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher.get_queue_events_flush_count">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_queue_events_flush_count</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher.get_queue_events_flush_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher.get_queue_events_flush_count" title="Link to this definition"></a></dt>
+<dd><p>Configuring the QUEUED_EVENTS_FLUSH_COUNT from the model
+:return: QUEUED_EVENTS_FLUSH_COUNT</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher.get_queue_events_batch_size">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_queue_events_batch_size</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher.get_queue_events_batch_size"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher.get_queue_events_batch_size" title="Link to this definition"></a></dt>
+<dd><p>Configuring the QUEUED_EVENTS_BATCH_SIZE from the model
+:return: QUEUED_EVENTS_BATCH_SIZE</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher.get_logstash_db_timeout">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_logstash_db_timeout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher.get_logstash_db_timeout"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher.get_logstash_db_timeout" title="Link to this definition"></a></dt>
+<dd><p>Configuring the DATABASE_TIMEOUT from the model
+:return: DATABASE_TIMEOUT</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher.dispatch_metrics">
+<span class="sig-name descname"><span class="pre">dispatch_metrics</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher.dispatch_metrics"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher.dispatch_metrics" title="Link to this definition"></a></dt>
+<dd><p>Sending the messages
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._update_server">
+<span class="sig-name descname"><span class="pre">_update_server</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._update_server"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._update_server" title="Link to this definition"></a></dt>
+<dd><p>Updating the CentralizedServer instance
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._set_time_range">
+<span class="sig-name descname"><span class="pre">_set_time_range</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._set_time_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._set_time_range" title="Link to this definition"></a></dt>
+<dd><p>Set up the time range as valid_to/valid_from and interval
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._get_message">
+<span class="sig-name descname"><span class="pre">_get_message</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._get_message"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._get_message" title="Link to this definition"></a></dt>
+<dd><p>Retrieving data querying the MetricValue model
+:param data_type: field mapping to keep only interesting information
+:return: data dictionary</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._build_data">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_build_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">item</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._build_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._build_data" title="Link to this definition"></a></dt>
+<dd><p>Extract interesting data from the query result
+:param item: query result item
+:param key: interesting key
+:return: interesting value</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._get_registered_users">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_registered_users</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._get_registered_users"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._get_registered_users" title="Link to this definition"></a></dt>
+<dd><p>Retrieving the users currently registered in GeoNode
+:return: users count</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._get_layers">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_layers</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._get_layers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._get_layers" title="Link to this definition"></a></dt>
+<dd><p>Retrieving all the existing datasets
+:return: datasets count</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._get_maps">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_maps</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._get_maps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._get_maps" title="Link to this definition"></a></dt>
+<dd><p>Retrieving all the existing maps
+:return: maps count</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._get_documents">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_documents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._get_documents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._get_documents" title="Link to this definition"></a></dt>
+<dd><p>Retrieving all the existing documents
+:return: documents count</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._get_errors">
+<span class="sig-name descname"><span class="pre">_get_errors</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._get_errors"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._get_errors" title="Link to this definition"></a></dt>
+<dd><p>Retrieving errors
+:return: errors count</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher._get_country_center">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">_get_country_center</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">iso_3</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher._get_country_center"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher._get_country_center" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.LogstashDispatcher.test_dispatch">
+<span class="sig-name descname"><span class="pre">test_dispatch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">host</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#LogstashDispatcher.test_dispatch"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.LogstashDispatcher.test_dispatch" title="Link to this definition"></a></dt>
+<dd><p>Testing connection to the centralized server
+:return: None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">GeonodeAsynchronousLogstashHandler</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeAsynchronousLogstashHandler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">logstash_async.handler.AsynchronousLogstashHandler</span></code></p>
+<p>Extends AsynchronousLogstashHandler to allow gzip compression</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler.formatter">
+<span class="sig-name descname"><span class="pre">formatter</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeAsynchronousLogstashHandler.formatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler.formatter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler._start_worker_thread">
+<span class="sig-name descname"><span class="pre">_start_worker_thread</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeAsynchronousLogstashHandler._start_worker_thread"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler._start_worker_thread" title="Link to this definition"></a></dt>
+<dd><p>Super method override to use GeonodeLogProcessingWorker
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler._format_record">
+<span class="sig-name descname"><span class="pre">_format_record</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeAsynchronousLogstashHandler._format_record"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler._format_record" title="Link to this definition"></a></dt>
+<dd><p>Super method overriding to allow gzip compression
+:param record: message to be formatted
+:return: formatted message</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler.get_last_entry_date">
+<span class="sig-name descname"><span class="pre">get_last_entry_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeAsynchronousLogstashHandler.get_last_entry_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler.get_last_entry_date" title="Link to this definition"></a></dt>
+<dd><p>Get entry date of the last queued event
+:return: Events</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeLogstashFormatter">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">GeonodeLogstashFormatter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gzip</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeLogstashFormatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeLogstashFormatter" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">logstash_async.formatter.LogstashFormatter</span></code></p>
+<p>Extends LogstashFormatter to allow gzip compression</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeLogstashFormatter._gzip">
+<span class="sig-name descname"><span class="pre">_gzip</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeLogstashFormatter._gzip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeLogstashFormatter._gzip" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeLogstashFormatter.format">
+<span class="sig-name descname"><span class="pre">format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">record</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeLogstashFormatter.format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeLogstashFormatter.format" title="Link to this definition"></a></dt>
+<dd><p>Super method overriding to allow json compression
+:param record: message
+:return: gzip compressed message
+:ref: <a class="reference external" href="https://stackoverflow.com/questions/8506897/how-do-i-gzip-compress-a-string-in-python">https://stackoverflow.com/questions/8506897/how-do-i-gzip-compress-a-string-in-python</a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeLogstashFormatter.json_gzip">
+<span class="sig-name descname"><span class="pre">json_gzip</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeLogstashFormatter.json_gzip"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeLogstashFormatter.json_gzip" title="Link to this definition"></a></dt>
+<dd><p>Gzip compression of serialized json
+:param j: input json to be compressed
+:return: compressed object</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeTcpTransport">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">GeonodeTcpTransport</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeTcpTransport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeTcpTransport" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">logstash_async.transport.TcpTransport</span></code></p>
+<p>Extends TcpTransport to avoid loss of messages</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeTcpTransport._send">
+<span class="sig-name descname"><span class="pre">_send</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">events</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeTcpTransport._send"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeTcpTransport._send" title="Link to this definition"></a></dt>
+<dd><p>Super method override to avoid loss of messages
+:param events: events to be processed
+:return: None</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeLogProcessingWorker">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">GeonodeLogProcessingWorker</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeLogProcessingWorker"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeLogProcessingWorker" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">logstash_async.worker.LogProcessingWorker</span></code></p>
+<p>Extends LogProcessingWorker to use GeonodeDatabaseCache</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeLogProcessingWorker._setup_database">
+<span class="sig-name descname"><span class="pre">_setup_database</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeLogProcessingWorker._setup_database"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeLogProcessingWorker._setup_database" title="Link to this definition"></a></dt>
+<dd><p>Ovverride of the super method to use GeonodeDatabaseCache
+:return: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeLogProcessingWorker.get_last_queued_event_date">
+<span class="sig-name descname"><span class="pre">get_last_queued_event_date</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeLogProcessingWorker.get_last_queued_event_date"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeLogProcessingWorker.get_last_queued_event_date" title="Link to this definition"></a></dt>
+<dd><p>Get the entry date of the last queued event
+:return: last event entry date</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeDatabaseCache">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">geonode_logstash.logstash.</span></span><span class="sig-name descname"><span class="pre">GeonodeDatabaseCache</span></span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeDatabaseCache"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeDatabaseCache" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-obj docutils literal notranslate"><span class="pre">logstash_async.database.DatabaseCache</span></code></p>
+<p>Extends DatabaseCache to have more method</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="geonode_logstash.logstash.GeonodeDatabaseCache.get_from_query">
+<span class="sig-name descname"><span class="pre">get_from_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query_fetch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/geonode_logstash/logstash.html#GeonodeDatabaseCache.get_from_query"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#geonode_logstash.logstash.GeonodeDatabaseCache.get_from_query" title="Link to this definition"></a></dt>
+<dd><p>Method to execute query and retrieve results
+:return: query results</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../admin/index.html" class="btn btn-neutral float-left" title="geonode_logstash.admin" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../models/index.html" class="btn btn-neutral float-right" title="geonode_logstash.models" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Kan Territory &amp; IT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

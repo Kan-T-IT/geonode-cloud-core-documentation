@@ -1,0 +1,15 @@
+geonode_logstash.management.commands
+====================================
+
+.. py:module:: geonode_logstash.management.commands
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/geonode_logstash/management/commands/dispatch_metrics/index
+
+

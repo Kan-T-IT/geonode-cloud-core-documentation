@@ -13,9 +13,10 @@ This page contains auto-generated API reference documentation [#f1]_.
    /autoapi/upload/index
    /autoapi/fabfile/index
    /autoapi/geonode/index
-   /autoapi/pavement/index
    /autoapi/changepw/index
    /autoapi/demo_site/index
-   /autoapi/create-envfile/index
+   /autoapi/gn24_to_24/index
+   /autoapi/gn20_to_24/index
+   /autoapi/geonode_logstash/index
 
 .. [#f1] Created with `sphinx-autoapi <https://github.com/readthedocs/sphinx-autoapi>`_

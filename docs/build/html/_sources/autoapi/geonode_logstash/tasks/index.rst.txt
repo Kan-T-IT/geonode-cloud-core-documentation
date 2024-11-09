@@ -1,0 +1,22 @@
+geonode_logstash.tasks
+======================
+
+.. py:module:: geonode_logstash.tasks
+
+
+Functions
+---------
+
+.. autoapisummary::
+
+   geonode_logstash.tasks.dispatch_metrics
+
+
+Module Contents
+---------------
+
+.. py:function:: dispatch_metrics(self)
+
+   Send metrics data to the centralized logstash server
+
+

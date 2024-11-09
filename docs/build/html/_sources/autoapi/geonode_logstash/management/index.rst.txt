@@ -1,0 +1,15 @@
+geonode_logstash.management
+===========================
+
+.. py:module:: geonode_logstash.management
+
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/geonode_logstash/management/commands/index
+
+

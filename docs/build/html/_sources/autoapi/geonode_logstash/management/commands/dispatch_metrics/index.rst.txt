@@ -1,0 +1,25 @@
+geonode_logstash.management.commands.dispatch_metrics
+=====================================================
+
+.. py:module:: geonode_logstash.management.commands.dispatch_metrics
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   geonode_logstash.management.commands.dispatch_metrics.Command
+
+
+Module Contents
+---------------
+
+.. py:class:: Command
+
+   Bases: :py:obj:`django.core.management.base.BaseCommand`
+
+
+   .. py:method:: handle(*args, **kwargs)
+
+

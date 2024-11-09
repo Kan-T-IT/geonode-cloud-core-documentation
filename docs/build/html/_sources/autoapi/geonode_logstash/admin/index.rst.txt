@@ -1,0 +1,74 @@
+geonode_logstash.admin
+======================
+
+.. py:module:: geonode_logstash.admin
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   geonode_logstash.admin.csrf_protect_m
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   geonode_logstash.admin.CentralizedServerAdmin
+
+
+Module Contents
+---------------
+
+.. py:data:: csrf_protect_m
+
+.. py:class:: CentralizedServerAdmin
+
+   Bases: :py:obj:`django.contrib.admin.ModelAdmin`
+
+
+   .. py:attribute:: list_display
+      :value: ('host', 'port', 'interval', 'last_successful_deliver', 'next_scheduled_deliver', 'last_failed_deliver')
+
+
+
+   .. py:attribute:: list_filter
+      :value: ('host',)
+
+
+
+   .. py:attribute:: readonly_fields
+      :value: ['last_successful_deliver', 'next_scheduled_deliver', 'last_failed_deliver']
+
+
+
+   .. py:attribute:: change_form_template
+      :value: 'admin/centralized_server_change_form.html'
+
+
+
+   .. py:attribute:: host
+      :value: None
+
+
+
+   .. py:attribute:: port
+      :value: None
+
+
+
+   .. py:method:: _test_connection(host, port)
+
+
+   .. py:method:: changeform_view(request, object_id=None, form_url='', extra_context=None)
+
+
+   .. py:method:: get_form(request, obj=None, **kwargs)
+
+
+   .. py:method:: has_add_permission(request)
+
+

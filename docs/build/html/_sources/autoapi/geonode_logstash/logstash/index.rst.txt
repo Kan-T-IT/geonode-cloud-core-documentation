@@ -1,0 +1,359 @@
+geonode_logstash.logstash
+=========================
+
+.. py:module:: geonode_logstash.logstash
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   geonode_logstash.logstash.log
+   geonode_logstash.logstash.IS_ENABLED
+   geonode_logstash.logstash.GZIP_COMPRESSED
+   geonode_logstash.logstash.DATA_TYPES_MAP
+   geonode_logstash.logstash.CUSTOM_DATA_TYPES_MAP
+   geonode_logstash.logstash.DATA_TYPES_MAP
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   geonode_logstash.logstash.LogstashDispatcher
+   geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler
+   geonode_logstash.logstash.GeonodeLogstashFormatter
+   geonode_logstash.logstash.GeonodeTcpTransport
+   geonode_logstash.logstash.GeonodeLogProcessingWorker
+   geonode_logstash.logstash.GeonodeDatabaseCache
+
+
+Module Contents
+---------------
+
+.. py:data:: log
+
+.. py:data:: IS_ENABLED
+
+.. py:data:: GZIP_COMPRESSED
+
+.. py:data:: DATA_TYPES_MAP
+
+.. py:data:: CUSTOM_DATA_TYPES_MAP
+
+.. py:data:: DATA_TYPES_MAP
+
+.. py:class:: LogstashDispatcher
+
+   Bases: :py:obj:`object`
+
+
+   Dispatcher of GeoNode metric data for Logstash server
+
+
+   .. py:attribute:: _centralized_server
+      :value: None
+
+
+
+   .. py:attribute:: _logger
+      :value: None
+
+
+
+   .. py:attribute:: _handler
+      :value: None
+
+
+
+   .. py:attribute:: _interval
+      :value: 0
+
+
+
+   .. py:attribute:: _collector
+      :value: None
+
+
+
+   .. py:method:: _init_server()
+
+      Initializing Dispatcher with basic information
+      :return: None
+
+
+
+   .. py:method:: _get_centralized_server()
+      :staticmethod:
+
+
+      Get the Centralized Server instance
+      :return: Centralized Server
+
+
+
+   .. py:method:: get_socket_timeout()
+      :staticmethod:
+
+
+      Configuring the SOCKET_TIMEOUT from the model
+      :return: SOCKET_TIMEOUT
+
+
+
+   .. py:method:: get_queue_check_interval()
+      :staticmethod:
+
+
+      Configuring the QUEUE_CHECK_INTERVAL from the model
+      :return: QUEUE_CHECK_INTERVAL
+
+
+
+   .. py:method:: get_queue_events_flush_interval()
+      :staticmethod:
+
+
+      Configuring the QUEUED_EVENTS_FLUSH_INTERVAL from the model
+      :return: QUEUED_EVENTS_FLUSH_INTERVAL
+
+
+
+   .. py:method:: get_queue_events_flush_count()
+      :staticmethod:
+
+
+      Configuring the QUEUED_EVENTS_FLUSH_COUNT from the model
+      :return: QUEUED_EVENTS_FLUSH_COUNT
+
+
+
+   .. py:method:: get_queue_events_batch_size()
+      :staticmethod:
+
+
+      Configuring the QUEUED_EVENTS_BATCH_SIZE from the model
+      :return: QUEUED_EVENTS_BATCH_SIZE
+
+
+
+   .. py:method:: get_logstash_db_timeout()
+      :staticmethod:
+
+
+      Configuring the DATABASE_TIMEOUT from the model
+      :return: DATABASE_TIMEOUT
+
+
+
+   .. py:method:: dispatch_metrics()
+
+      Sending the messages
+      :return: None
+
+
+
+   .. py:method:: _update_server()
+
+      Updating the CentralizedServer instance
+      :return: None
+
+
+
+   .. py:method:: _set_time_range()
+
+      Set up the time range as valid_to/valid_from and interval
+      :return: None
+
+
+
+   .. py:method:: _get_message(data_type)
+
+      Retrieving data querying the MetricValue model
+      :param data_type: field mapping to keep only interesting information
+      :return: data dictionary
+
+
+
+   .. py:method:: _build_data(item, key)
+      :staticmethod:
+
+
+      Extract interesting data from the query result
+      :param item: query result item
+      :param key: interesting key
+      :return: interesting value
+
+
+
+   .. py:method:: _get_registered_users()
+      :staticmethod:
+
+
+      Retrieving the users currently registered in GeoNode
+      :return: users count
+
+
+
+   .. py:method:: _get_layers()
+      :staticmethod:
+
+
+      Retrieving all the existing datasets
+      :return: datasets count
+
+
+
+   .. py:method:: _get_maps()
+      :staticmethod:
+
+
+      Retrieving all the existing maps
+      :return: maps count
+
+
+
+   .. py:method:: _get_documents()
+      :staticmethod:
+
+
+      Retrieving all the existing documents
+      :return: documents count
+
+
+
+   .. py:method:: _get_errors()
+
+      Retrieving errors
+      :return: errors count
+
+
+
+   .. py:method:: _get_country_center(iso_3)
+      :staticmethod:
+
+
+
+   .. py:method:: test_dispatch(host=None, port=None)
+
+      Testing connection to the centralized server
+      :return: None
+
+
+
+.. py:class:: GeonodeAsynchronousLogstashHandler(*args, **kwargs)
+
+   Bases: :py:obj:`logstash_async.handler.AsynchronousLogstashHandler`
+
+
+   Extends AsynchronousLogstashHandler to allow gzip compression
+
+
+   .. py:attribute:: formatter
+
+
+   .. py:method:: _start_worker_thread()
+
+      Super method override to use GeonodeLogProcessingWorker
+      :return: None
+
+
+
+   .. py:method:: _format_record(record)
+
+      Super method overriding to allow gzip compression
+      :param record: message to be formatted
+      :return: formatted message
+
+
+
+   .. py:method:: get_last_entry_date()
+
+      Get entry date of the last queued event
+      :return: Events
+
+
+
+.. py:class:: GeonodeLogstashFormatter(gzip=False, *args, **kwargs)
+
+   Bases: :py:obj:`logstash_async.formatter.LogstashFormatter`
+
+
+   Extends LogstashFormatter to allow gzip compression
+
+
+   .. py:attribute:: _gzip
+
+
+   .. py:method:: format(record)
+
+      Super method overriding to allow json compression
+      :param record: message
+      :return: gzip compressed message
+      :ref: https://stackoverflow.com/questions/8506897/how-do-i-gzip-compress-a-string-in-python
+
+
+
+   .. py:method:: json_gzip(data)
+
+      Gzip compression of serialized json
+      :param j: input json to be compressed
+      :return: compressed object
+
+
+
+.. py:class:: GeonodeTcpTransport
+
+   Bases: :py:obj:`logstash_async.transport.TcpTransport`
+
+
+   Extends TcpTransport to avoid loss of messages
+
+
+   .. py:method:: _send(events)
+
+      Super method override to avoid loss of messages
+      :param events: events to be processed
+      :return: None
+
+
+
+.. py:class:: GeonodeLogProcessingWorker
+
+   Bases: :py:obj:`logstash_async.worker.LogProcessingWorker`
+
+
+   Extends LogProcessingWorker to use GeonodeDatabaseCache
+
+
+   .. py:method:: _setup_database()
+
+      Ovverride of the super method to use GeonodeDatabaseCache
+      :return: None
+
+
+
+   .. py:method:: get_last_queued_event_date()
+
+      Get the entry date of the last queued event
+      :return: last event entry date
+
+
+
+.. py:class:: GeonodeDatabaseCache
+
+   Bases: :py:obj:`logstash_async.database.DatabaseCache`
+
+
+   Extends DatabaseCache to have more method
+
+
+   .. py:method:: get_from_query(query_fetch)
+
+      Method to execute query and retrieve results
+      :return: query results
+
+
+

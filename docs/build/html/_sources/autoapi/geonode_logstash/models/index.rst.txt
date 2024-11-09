@@ -1,0 +1,84 @@
+geonode_logstash.models
+=======================
+
+.. py:module:: geonode_logstash.models
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   geonode_logstash.models.COUNTRIES_GEODB
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   geonode_logstash.models.CentralizedServer
+
+
+Module Contents
+---------------
+
+.. py:data:: COUNTRIES_GEODB
+
+.. py:class:: CentralizedServer
+
+   Bases: :py:obj:`django.db.models.Model`
+
+
+   Centralized Server for monitoring/analytics metrics data
+
+
+   .. py:attribute:: host
+
+
+   .. py:attribute:: port
+
+
+   .. py:attribute:: local_ip
+
+
+   .. py:attribute:: interval
+
+
+   .. py:attribute:: db_path
+
+
+   .. py:attribute:: socket_timeout
+
+
+   .. py:attribute:: queue_check_interval
+
+
+   .. py:attribute:: queue_events_flush_interval
+
+
+   .. py:attribute:: queue_events_flush_count
+
+
+   .. py:attribute:: queue_events_batch_size
+
+
+   .. py:attribute:: logstash_db_timeout
+
+
+   .. py:attribute:: last_successful_deliver
+
+
+   .. py:attribute:: next_scheduled_deliver
+
+
+   .. py:attribute:: last_failed_deliver
+
+
+   .. py:method:: save(*args, **kwargs)
+
+      Overriding the 'save' super method.
+      We have to sync PeriodicTask with CentralizedServer
+
+
+

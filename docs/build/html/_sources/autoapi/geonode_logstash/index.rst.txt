@@ -1,0 +1,66 @@
+geonode_logstash
+================
+
+.. py:module:: geonode_logstash
+
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/geonode_logstash/management/index
+
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 1
+
+   /autoapi/geonode_logstash/admin/index
+   /autoapi/geonode_logstash/logstash/index
+   /autoapi/geonode_logstash/models/index
+   /autoapi/geonode_logstash/tasks/index
+   /autoapi/geonode_logstash/tests/index
+
+
+Attributes
+----------
+
+.. autoapisummary::
+
+   geonode_logstash.default_app_config
+
+
+Classes
+-------
+
+.. autoapisummary::
+
+   geonode_logstash.LogstashAppConfig
+
+
+Package Contents
+----------------
+
+.. py:class:: LogstashAppConfig
+
+   Bases: :py:obj:`django.apps.AppConfig`
+
+
+   .. py:attribute:: name
+      :value: 'geonode_logstash'
+
+
+
+   .. py:attribute:: label
+      :value: 'geonode_logstash'
+
+
+
+.. py:data:: default_app_config
+   :value: 'geonode_logstash.LogstashAppConfig'
+
+

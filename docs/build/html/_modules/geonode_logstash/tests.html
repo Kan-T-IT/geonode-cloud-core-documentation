@@ -1,0 +1,306 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geonode_logstash.tests &mdash; GeoNode Cloud Core 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoNode Cloud Core
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoNode Cloud Core</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../geonode_logstash.html">geonode_logstash</a></li>
+      <li class="breadcrumb-item active">geonode_logstash.tests</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geonode_logstash.tests</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#########################################################################</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (C) 2017 OSGeo</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#</span>
+<span class="c1">#########################################################################</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">datetime</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">binascii</span>
+<span class="kn">from</span> <span class="nn">geonode.tests.base</span> <span class="kn">import</span> <span class="n">GeoNodeBaseTestSupport</span>
+<span class="kn">from</span> <span class="nn">django.test.utils</span> <span class="kn">import</span> <span class="n">override_settings</span>
+<span class="kn">from</span> <span class="nn">django.core.management</span> <span class="kn">import</span> <span class="n">call_command</span>
+<span class="kn">from</span> <span class="nn">geonode_logstash.models</span> <span class="kn">import</span> <span class="n">CentralizedServer</span>
+<span class="kn">from</span> <span class="nn">geonode_logstash.logstash</span> <span class="kn">import</span> <span class="n">LogstashDispatcher</span>
+<span class="c1"># from django_celery_beat.models import PeriodicTask, IntervalSchedul</span>
+
+<div class="viewcode-block" id="logger">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/tests/index.html#geonode_logstash.tests.logger">[docs]</a>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="GeonodeLogstashTest">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/tests/index.html#geonode_logstash.tests.GeonodeLogstashTest">[docs]</a>
+<span class="k">class</span> <span class="nc">GeonodeLogstashTest</span><span class="p">(</span><span class="n">GeoNodeBaseTestSupport</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Test the geonode_logstash application.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="GeonodeLogstashTest.resources">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/tests/index.html#geonode_logstash.tests.GeonodeLogstashTest.resources">[docs]</a>
+    <span class="n">resources</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">17</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ogc_hits&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;url&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visits&quot;</span><span class="p">:</span> <span class="mi">14</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="mi">5</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;geonode:waterways&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ogc_hits&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;layer&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visits&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s2">&quot;publications&quot;</span><span class="p">:</span> <span class="mi">2</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;geonode:railways&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ogc_hits&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;downloads&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;layer&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visits&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;publications&quot;</span><span class="p">:</span> <span class="mi">2</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;geonode:roads&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ogc_hits&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;layer&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visits&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;publications&quot;</span><span class="p">:</span> <span class="mi">2</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;San Francisco Transport Map&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ogc_hits&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;map&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visits&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;publications&quot;</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Amsterdam Waterways Map&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;ogc_hits&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;map&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visits&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;publications&quot;</span><span class="p">:</span> <span class="mi">1</span>
+        <span class="p">}</span>
+    <span class="p">]</span></div>
+
+<div class="viewcode-block" id="GeonodeLogstashTest.ua_families">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/tests/index.html#geonode_logstash.tests.GeonodeLogstashTest.ua_families">[docs]</a>
+    <span class="n">ua_families</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">174</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;PC / Ubuntu / Firefox 68.0&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">17</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Other / Other / Apache-HttpClient 4.5.5&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">7</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Other / Other / Python Requests 2.22&quot;</span>
+        <span class="p">},</span>
+        <span class="p">{</span>
+            <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Spider / Other / Java 8.0.212&quot;</span>
+        <span class="p">}</span>
+    <span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="GeonodeLogstashTest.setUp">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/tests/index.html#geonode_logstash.tests.GeonodeLogstashTest.setUp">[docs]</a>
+    <span class="k">def</span> <span class="nf">setUp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeonodeLogstashTest</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">setUp</span><span class="p">()</span>
+        <span class="n">call_command</span><span class="p">(</span><span class="s1">&#39;loaddata&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_data&#39;</span><span class="p">,</span> <span class="n">verbosity</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">date_from</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;2018-09-11T20:00:00.000Z&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">Z&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">date_from</span><span class="p">)</span>
+        <span class="n">date_to</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="s1">&#39;2019-09-11T20:00:00.000Z&#39;</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1">T%H:%M:%S.</span><span class="si">%f</span><span class="s1">Z&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">date_to</span><span class="p">)</span></div>
+
+
+    <span class="c1"># @override_settings(MONITORING_ENABLED=True, USER_ANALYTICS_ENABLED=True, USER_ANALYTICS_GZIP=True)</span>
+    <span class="c1"># def centralized_server_config_test(self):</span>
+    <span class="c1">#     CentralizedServer.objects.get_or_create(</span>
+    <span class="c1">#         host=&quot;192.168.1.95&quot;, port=&quot;5000&quot;, interval=3600</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     pts = PeriodicTask.objects.filter(</span>
+    <span class="c1">#         name=&quot;dispatch-metrics-task&quot;,</span>
+    <span class="c1">#         task=&quot;geonode_logstash.tasks.dispatch_metrics&quot;,</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     self.assertTrue(pts.count() == 1)</span>
+    <span class="c1">#     pt = pts.first()</span>
+    <span class="c1">#     self.assertEqual(pt.name, &quot;geonode_logstash.tasks.dispatch_metrics&quot;)</span>
+    <span class="c1">#     self.assertIsNotNone(pt.interval)</span>
+    <span class="c1">#     self.assertEqual(pt.interval.every, 3600)</span>
+    <span class="c1">#     self.assertEqual(pt.interval.period, IntervalSchedule.SECONDS)</span>
+
+    <span class="nd">@override_settings</span><span class="p">(</span><span class="n">MONITORING_ENABLED</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">USER_ANALYTICS_ENABLED</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">USER_ANALYTICS_GZIP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="GeonodeLogstashTest.test_get_message">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/tests/index.html#geonode_logstash.tests.GeonodeLogstashTest.test_get_message">[docs]</a>
+    <span class="k">def</span> <span class="nf">test_get_message</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ld</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="p">()</span>
+        <span class="n">ld</span><span class="o">.</span><span class="n">_valid_from</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span>
+        <span class="n">ld</span><span class="o">.</span><span class="n">_valid_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span>
+        <span class="k">for</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">DATA_TYPES_MAP</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="n">ld</span><span class="o">.</span><span class="n">_get_message</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;instance&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;instance&quot;</span><span class="p">][</span><span class="s2">&quot;ip&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;instance&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;format_version&quot;</span><span class="p">],</span> <span class="s2">&quot;1.0&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">][</span><span class="s2">&quot;startTime&quot;</span><span class="p">],</span> <span class="s2">&quot;2018-09-11 20:00:00+00:00&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;time&quot;</span><span class="p">][</span><span class="s2">&quot;endTime&quot;</span><span class="p">],</span> <span class="s2">&quot;2019-09-11 20:00:00+00:00&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_type</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;overview&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;layers&quot;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;documents&quot;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;maps&quot;</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;errors&quot;</span><span class="p">],</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;hits&quot;</span><span class="p">],</span> <span class="mi">201</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;unique_visits&quot;</span><span class="p">],</span> <span class="mi">14</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;unique_visitors&quot;</span><span class="p">],</span> <span class="mi">5</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;registered_users&quot;</span><span class="p">],</span> <span class="mi">4</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_type</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;resources&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;resources&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">resources</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data_type</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;countries&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;countries&quot;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">data_type</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="s2">&quot;ua_families&quot;</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">assertEqual</span><span class="p">(</span><span class="n">msg</span><span class="p">[</span><span class="s2">&quot;ua_families&quot;</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">ua_families</span><span class="p">)</span></div>
+
+
+    <span class="nd">@override_settings</span><span class="p">(</span><span class="n">MONITORING_ENABLED</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">USER_ANALYTICS_ENABLED</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">USER_ANALYTICS_GZIP</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="viewcode-block" id="GeonodeLogstashTest.test_format_record">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/tests/index.html#geonode_logstash.tests.GeonodeLogstashTest.test_format_record">[docs]</a>
+    <span class="k">def</span> <span class="nf">test_format_record</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ld</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="p">()</span>
+        <span class="n">ld</span><span class="o">.</span><span class="n">_valid_from</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span>
+        <span class="n">ld</span><span class="o">.</span><span class="n">_valid_to</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">ld</span><span class="o">.</span><span class="n">_get_message</span><span class="p">(</span><span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">DATA_TYPES_MAP</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">ld</span><span class="o">.</span><span class="n">_handler</span><span class="o">.</span><span class="n">formatter</span>
+        <span class="n">compressed</span> <span class="o">=</span> <span class="n">formatter</span><span class="o">.</span><span class="n">json_gzip</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">assertTrue</span><span class="p">(</span><span class="n">binascii</span><span class="o">.</span><span class="n">hexlify</span><span class="p">(</span><span class="n">compressed</span><span class="p">),</span> <span class="sa">b</span><span class="s1">&#39;1f8b&#39;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Kan Territory &amp; IT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

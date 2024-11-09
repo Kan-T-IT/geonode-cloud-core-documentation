@@ -1,0 +1,1065 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>geonode_logstash.logstash &mdash; GeoNode Cloud Core 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=8d563738"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            GeoNode Cloud Core
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contenido</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../autoapi/index.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">GeoNode Cloud Core</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+          <li class="breadcrumb-item"><a href="../geonode_logstash.html">geonode_logstash</a></li>
+      <li class="breadcrumb-item active">geonode_logstash.logstash</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for geonode_logstash.logstash</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1">#########################################################################</span>
+<span class="c1">#</span>
+<span class="c1"># Copyright (C) 2019 OSGeo</span>
+<span class="c1">#</span>
+<span class="c1"># This program is free software: you can redistribute it and/or modify</span>
+<span class="c1"># it under the terms of the GNU General Public License as published by</span>
+<span class="c1"># the Free Software Foundation, either version 3 of the License, or</span>
+<span class="c1"># (at your option) any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># This program is distributed in the hope that it will be useful,</span>
+<span class="c1"># but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span class="c1"># MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the</span>
+<span class="c1"># GNU General Public License for more details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU General Public License</span>
+<span class="c1"># along with this program. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="c1">#</span>
+<span class="c1">#########################################################################</span>
+<span class="kn">import</span> <span class="nn">six</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">gzip</span>
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">socket</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">sqlite3</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">pycountry</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="kn">from</span> <span class="nn">django.conf</span> <span class="kn">import</span> <span class="n">settings</span>
+<span class="kn">from</span> <span class="nn">django.contrib.auth</span> <span class="kn">import</span> <span class="n">get_user_model</span>
+<span class="c1"># from django_celery_beat.models import PeriodicTask</span>
+
+<span class="kn">from</span> <span class="nn">geonode.maps.models</span> <span class="kn">import</span> <span class="n">Map</span>
+<span class="kn">from</span> <span class="nn">geonode.layers.models</span> <span class="kn">import</span> <span class="n">Dataset</span>
+<span class="kn">from</span> <span class="nn">geonode.documents.models</span> <span class="kn">import</span> <span class="n">Document</span>
+<span class="kn">from</span> <span class="nn">geonode.monitoring.models</span> <span class="kn">import</span> <span class="n">EventType</span>
+<span class="kn">from</span> <span class="nn">geonode.monitoring.collector</span> <span class="kn">import</span> <span class="n">CollectorAPI</span>
+<span class="kn">from</span> <span class="nn">geonode.monitoring.views</span> <span class="kn">import</span> <span class="n">ExceptionsListView</span>
+
+<span class="kn">from</span> <span class="nn">logstash_async</span> <span class="kn">import</span> <span class="n">EVENT_CACHE</span>
+<span class="kn">from</span> <span class="nn">logstash_async.constants</span> <span class="kn">import</span> <span class="n">constants</span>
+<span class="kn">from</span> <span class="nn">logstash_async.database</span> <span class="kn">import</span> <span class="n">DatabaseCache</span>
+<span class="kn">from</span> <span class="nn">logstash_async.transport</span> <span class="kn">import</span> <span class="n">TcpTransport</span>
+<span class="kn">from</span> <span class="nn">logstash_async.memory_cache</span> <span class="kn">import</span> <span class="n">MemoryCache</span>
+<span class="kn">from</span> <span class="nn">logstash_async.worker</span> <span class="kn">import</span> <span class="n">LogProcessingWorker</span>
+<span class="kn">from</span> <span class="nn">logstash_async.formatter</span> <span class="kn">import</span> <span class="n">LogstashFormatter</span>
+<span class="kn">from</span> <span class="nn">logstash_async.handler</span> <span class="kn">import</span> <span class="n">AsynchronousLogstashHandler</span>
+
+<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span><span class="p">,</span> <span class="n">BytesIO</span>
+
+<span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">COUNTRIES_GEODB</span><span class="p">,</span>
+    <span class="n">CentralizedServer</span>
+<span class="p">)</span>
+
+<div class="viewcode-block" id="log">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.log">[docs]</a>
+<span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="IS_ENABLED">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.IS_ENABLED">[docs]</a>
+<span class="n">IS_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MONITORING_ENABLED</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">USER_ANALYTICS_ENABLED</span></div>
+
+<div class="viewcode-block" id="GZIP_COMPRESSED">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GZIP_COMPRESSED">[docs]</a>
+<span class="n">GZIP_COMPRESSED</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s1">&#39;USER_ANALYTICS_GZIP&#39;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span></div>
+
+
+<span class="n">DATA_TYPES_MAP</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;overview&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.users&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;label&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;unique_visits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.users&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;user&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;extra&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;registered_users&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;layers&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;documents&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;maps&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;errors&quot;</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resources&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.type&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;url&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.href&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.users&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource_on_label&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;unique_visits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.users&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource_on_user&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">EventType</span><span class="o">.</span><span class="n">EVENT_DOWNLOAD</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;downloads&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">EventType</span><span class="o">.</span><span class="n">EVENT_OWS</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;ogc_hits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="n">EventType</span><span class="o">.</span><span class="n">EVENT_PUBLISH</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;publications&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;countries&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.country&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">],</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;ua_families&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.ua.family&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;label&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">},</span> <span class="c1"># Start custom settings ---&gt;</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;documents&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="s2">&quot;upload&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;uploads&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;maps&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;event_type&quot;</span><span class="p">:</span> <span class="s2">&quot;create&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;creates&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;datasets&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;metrics&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;resource&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.count&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;event_type&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;event_type&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;hits&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;request.users&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;params&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;group_by&quot;</span><span class="p">:</span> <span class="s2">&quot;user_on_label&quot;</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;resource.name&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;unique_visitors&quot;</span><span class="p">:</span> <span class="s2">&quot;val&quot;</span>
+                <span class="p">}</span>
+            <span class="p">}</span>
+        <span class="p">]</span>
+    <span class="p">}</span>    
+<span class="p">]</span>
+
+
+<span class="c1"># Overrides the default DATA_TYPES_MAP with the custom one from settings</span>
+<div class="viewcode-block" id="CUSTOM_DATA_TYPES_MAP">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.CUSTOM_DATA_TYPES_MAP">[docs]</a>
+<span class="n">CUSTOM_DATA_TYPES_MAP</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">settings</span><span class="p">,</span> <span class="s1">&#39;DATA_TYPES_MAP&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span></div>
+
+<span class="k">if</span> <span class="n">CUSTOM_DATA_TYPES_MAP</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+<div class="viewcode-block" id="DATA_TYPES_MAP">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.DATA_TYPES_MAP">[docs]</a>
+    <span class="n">DATA_TYPES_MAP</span> <span class="o">=</span> <span class="n">CUSTOM_DATA_TYPES_MAP</span></div>
+
+
+
+<div class="viewcode-block" id="LogstashDispatcher">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher">[docs]</a>
+<span class="k">class</span> <span class="nc">LogstashDispatcher</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dispatcher of GeoNode metric data for Logstash server</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="LogstashDispatcher._centralized_server">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._centralized_server">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="LogstashDispatcher._logger">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._logger">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="LogstashDispatcher._handler">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._handler">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_handler</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="LogstashDispatcher._interval">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._interval">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span> <span class="o">=</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="LogstashDispatcher._collector">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._collector">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collector</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_server</span><span class="p">()</span>
+
+<div class="viewcode-block" id="LogstashDispatcher._init_server">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._init_server">[docs]</a>
+    <span class="k">def</span> <span class="nf">_init_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initializing Dispatcher with basic information</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># self.manage_task()</span>
+        <span class="k">if</span> <span class="n">IS_ENABLED</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_centralized_server</span><span class="p">()</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="p">:</span>
+                <span class="c1"># self._centralized_server.sync_periodic_task()</span>
+                <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">host</span>
+                <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">port</span>
+                <span class="n">db_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">db_path</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">db_path</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;geonode-logstash-logger&#39;</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_handler</span> <span class="o">=</span> <span class="n">GeonodeAsynchronousLogstashHandler</span><span class="p">(</span>
+                    <span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">database_path</span><span class="o">=</span><span class="n">db_path</span><span class="p">,</span> <span class="n">transport</span><span class="o">=</span><span class="n">GeonodeTcpTransport</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_handler</span><span class="p">)</span>
+                <span class="c1"># self.client_ip = socket.gethostbyname(socket.gethostname())</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">client_ip</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">local_ip</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_collector</span> <span class="o">=</span> <span class="n">CollectorAPI</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_set_time_range</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Monitoring/analytics disabled, centralized server cannot be set up.&quot;</span><span class="p">)</span></div>
+
+
+    <span class="c1"># @staticmethod</span>
+    <span class="c1"># def manage_task():</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     Disable celery task</span>
+    <span class="c1">#     &quot;&quot;&quot;</span>
+    <span class="c1">#     pts = PeriodicTask.objects.filter(</span>
+    <span class="c1">#         name=&quot;dispatch-metrics-task&quot;,</span>
+    <span class="c1">#         task=&quot;geonode_logstash.tasks.dispatch_metrics&quot;,</span>
+    <span class="c1">#     )</span>
+    <span class="c1">#     for pt in pts:</span>
+    <span class="c1">#         pt.enabled = IS_ENABLED</span>
+    <span class="c1">#         pt.save()</span>
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher._get_centralized_server">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._get_centralized_server">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_centralized_server</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the Centralized Server instance</span>
+<span class="sd">        :return: Centralized Server</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cs</span> <span class="o">=</span> <span class="n">CentralizedServer</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">cs</span>
+        <span class="k">except</span> <span class="n">CentralizedServer</span><span class="o">.</span><span class="n">DoesNotExist</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Centralized server not found.&quot;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher.get_socket_timeout">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher.get_socket_timeout">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_socket_timeout</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuring the SOCKET_TIMEOUT from the model</span>
+<span class="sd">        :return: SOCKET_TIMEOUT</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">_get_centralized_server</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cs</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">socket_timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot; ---------------------- socket_timeout </span><span class="si">%s</span><span class="s2"> &quot;</span> <span class="o">%</span> <span class="n">cs</span><span class="o">.</span><span class="n">socket_timeout</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">socket_timeout</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">SOCKET_TIMEOUT</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher.get_queue_check_interval">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher.get_queue_check_interval">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_queue_check_interval</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuring the QUEUE_CHECK_INTERVAL from the model</span>
+<span class="sd">        :return: QUEUE_CHECK_INTERVAL</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">_get_centralized_server</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cs</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">queue_check_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">queue_check_interval</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">QUEUE_CHECK_INTERVAL</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher.get_queue_events_flush_interval">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher.get_queue_events_flush_interval">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_queue_events_flush_interval</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuring the QUEUED_EVENTS_FLUSH_INTERVAL from the model</span>
+<span class="sd">        :return: QUEUED_EVENTS_FLUSH_INTERVAL</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">_get_centralized_server</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cs</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">queue_events_flush_interval</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">queue_events_flush_interval</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">QUEUED_EVENTS_FLUSH_INTERVAL</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher.get_queue_events_flush_count">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher.get_queue_events_flush_count">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_queue_events_flush_count</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuring the QUEUED_EVENTS_FLUSH_COUNT from the model</span>
+<span class="sd">        :return: QUEUED_EVENTS_FLUSH_COUNT</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">_get_centralized_server</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cs</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">queue_events_flush_count</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">queue_events_flush_count</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">QUEUED_EVENTS_FLUSH_COUNT</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher.get_queue_events_batch_size">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher.get_queue_events_batch_size">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_queue_events_batch_size</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuring the QUEUED_EVENTS_BATCH_SIZE from the model</span>
+<span class="sd">        :return: QUEUED_EVENTS_BATCH_SIZE</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">_get_centralized_server</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cs</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">queue_events_batch_size</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">queue_events_batch_size</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">QUEUED_EVENTS_BATCH_SIZE</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher.get_logstash_db_timeout">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher.get_logstash_db_timeout">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_logstash_db_timeout</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Configuring the DATABASE_TIMEOUT from the model</span>
+<span class="sd">        :return: DATABASE_TIMEOUT</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">_get_centralized_server</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">cs</span> <span class="ow">and</span> <span class="n">cs</span><span class="o">.</span><span class="n">logstash_db_timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">logstash_db_timeout</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">constants</span><span class="o">.</span><span class="n">DATABASE_TIMEOUT</span></div>
+
+
+<div class="viewcode-block" id="LogstashDispatcher.dispatch_metrics">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher.dispatch_metrics">[docs]</a>
+    <span class="k">def</span> <span class="nf">dispatch_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sending the messages</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">IS_ENABLED</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">data_type</span> <span class="ow">in</span> <span class="n">DATA_TYPES_MAP</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_message</span><span class="p">(</span><span class="n">data_type</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot; ------------------------------------------------ &quot;</span><span class="p">)</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+                            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">get_socket_timeout</span><span class="p">())</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="c1"># Note: it catches exceptions on current thread only</span>
+                        <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                        <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Sending data failed: &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="c1"># Updating CentralizedServer</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_update_server</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Monitoring/analytics disabled, centralized server cannot be set up.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Centralized server not found.&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="LogstashDispatcher._update_server">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._update_server">[docs]</a>
+    <span class="k">def</span> <span class="nf">_update_server</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updating the CentralizedServer instance</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># We have to wait for db to be updated</span>
+        <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">get_logstash_db_timeout</span><span class="p">())</span>
+        <span class="c1"># We have to retrieve the &quot;entry_date&quot; of the last event in queue</span>
+        <span class="n">last_event_date</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handler</span><span class="o">.</span><span class="n">get_last_entry_date</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">last_event_date</span><span class="p">:</span>
+            <span class="n">date_time_obj</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">last_event_date</span><span class="p">,</span> <span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">last_failed_deliver</span> <span class="o">=</span> <span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="o">.</span><span class="n">localize</span><span class="p">(</span><span class="n">date_time_obj</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If no events in queue then it means all events have been flushed</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">last_successful_deliver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">last_failed_deliver</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">next_scheduled_deliver</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span>
+            <span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">interval</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">save</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="LogstashDispatcher._set_time_range">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._set_time_range">[docs]</a>
+    <span class="k">def</span> <span class="nf">_set_time_range</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up the time range as valid_to/valid_from and interval</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span>
+            <span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">interval</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_interval</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="LogstashDispatcher._get_message">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._get_message">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_type</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieving data querying the MetricValue model</span>
+<span class="sd">        :param data_type: field mapping to keep only interesting information</span>
+<span class="sd">        :return: data dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">has_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Name of the object read by logstash filter (not used in case of &quot;overview&quot;)</span>
+        <span class="n">data_name</span> <span class="o">=</span> <span class="n">data_type</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="c1"># Define data HEADER</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;format_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;data_type&quot;</span><span class="p">:</span> <span class="n">data_name</span><span class="p">,</span>
+            <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">HOSTNAME</span><span class="p">,</span>
+                <span class="s2">&quot;ip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_ip</span>
+            <span class="p">},</span>
+            <span class="s2">&quot;time&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;startTime&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span><span class="o">.</span><span class="n">isoformat</span><span class="p">(),</span>
+                <span class="s2">&quot;endTime&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+        <span class="c1"># List data container (not used in case of &quot;overview&quot;)</span>
+        <span class="n">list_data</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># For each metric we want to execute a query</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">data_type</span><span class="p">[</span><span class="s2">&quot;metrics&quot;</span><span class="p">]:</span>
+            <span class="c1"># Name omitted in hooks when retrieving no-list data (es. &quot;overview&quot;)</span>
+            <span class="n">is_list</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;hooks&quot;</span><span class="p">]</span>
+            <span class="n">group_by</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">][</span><span class="s2">&quot;group_by&quot;</span><span class="p">]</span> \
+                <span class="k">if</span> <span class="s2">&quot;params&quot;</span> <span class="ow">in</span> <span class="n">metric</span> <span class="ow">and</span> <span class="s2">&quot;group_by&quot;</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> \
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="n">event_type</span> <span class="o">=</span> <span class="n">EventType</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">][</span><span class="s2">&quot;event_type&quot;</span><span class="p">])</span> \
+                <span class="k">if</span> <span class="s2">&quot;params&quot;</span> <span class="ow">in</span> <span class="n">metric</span> <span class="ow">and</span> <span class="s2">&quot;event_type&quot;</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;params&quot;</span><span class="p">]</span> \
+                <span class="k">else</span> <span class="kc">None</span>
+            <span class="c1"># Retrieving data through the CollectorAPI object</span>
+            <span class="n">metrics_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collector</span><span class="o">.</span><span class="n">get_metrics_data</span><span class="p">(</span>
+                <span class="n">metric_name</span><span class="o">=</span><span class="n">metric</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">],</span>
+                <span class="n">valid_from</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span><span class="p">,</span>
+                <span class="n">valid_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span><span class="p">,</span>
+                <span class="n">interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval</span><span class="p">,</span>
+                <span class="n">event_type</span><span class="o">=</span><span class="n">event_type</span><span class="p">,</span>
+                <span class="n">group_by</span><span class="o">=</span><span class="n">group_by</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">metrics_data</span><span class="p">:</span>
+                <span class="c1"># data dictionary updating</span>
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">metrics_data</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">is_list</span><span class="p">:</span>
+                        <span class="n">name_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_data</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;hooks&quot;</span><span class="p">][</span><span class="s2">&quot;name&quot;</span><span class="p">])</span>
+                    <span class="n">item_value</span> <span class="o">=</span> <span class="p">{</span>
+                        <span class="n">k</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_data</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">[</span><span class="s2">&quot;hooks&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="p">}</span>
+                    <span class="k">if</span> <span class="s2">&quot;countries&quot;</span> <span class="o">==</span> <span class="n">data_name</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">country_iso_3</span> <span class="o">=</span> <span class="n">pycountry</span><span class="o">.</span><span class="n">countries</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                                <span class="n">alpha_3</span><span class="o">=</span><span class="n">name_value</span><span class="p">)</span><span class="o">.</span><span class="n">alpha_3</span>
+                            <span class="n">center</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_country_center</span><span class="p">(</span><span class="n">country_iso_3</span><span class="p">)</span>
+                            <span class="n">item_value</span><span class="p">[</span><span class="s1">&#39;center&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">center</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">is_list</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">list_item</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span>
+                                <span class="k">lambda</span> <span class="n">l_item</span><span class="p">:</span> <span class="n">l_item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">==</span> <span class="n">name_value</span><span class="p">,</span> <span class="n">list_data</span>
+                            <span class="p">)</span>
+                            <span class="n">_idx</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">list_item</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                            <span class="n">i</span> <span class="o">=</span> <span class="n">list_data</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">_idx</span><span class="p">)</span>
+                            <span class="n">list_data</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">item_value</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="p">(</span><span class="ne">IndexError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">list_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">item_value</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">item_value</span><span class="p">)</span>
+                        <span class="n">has_data</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">list_data</span><span class="p">:</span>
+            <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">data_name</span><span class="p">:</span> <span class="n">list_data</span><span class="p">})</span>
+            <span class="n">has_data</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="s2">&quot;extra&quot;</span> <span class="ow">in</span> <span class="n">data_type</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">extra</span> <span class="ow">in</span> <span class="n">data_type</span><span class="p">[</span><span class="s2">&quot;extra&quot;</span><span class="p">]:</span>
+                <span class="c1"># For each &quot;extra&quot; entry we have to define a &quot;_get_{extra}&quot; method</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                    <span class="n">extra</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_get_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">extra</span><span class="p">))()</span>
+                <span class="p">})</span>
+                <span class="n">has_data</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="n">data</span> <span class="k">if</span> <span class="n">has_data</span> <span class="k">else</span> <span class="kc">None</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher._build_data">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._build_data">[docs]</a>
+    <span class="k">def</span> <span class="nf">_build_data</span><span class="p">(</span><span class="n">item</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract interesting data from the query result</span>
+<span class="sd">        :param item: query result item</span>
+<span class="sd">        :param key: interesting key</span>
+<span class="sd">        :return: interesting value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="n">k</span><span class="p">][</span><span class="n">v</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">e</span> <span class="o">=</span> <span class="ne">Exception</span>
+                <span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="p">(</span><span class="s2">&quot;DATA_TYPES_MAP not valid for item </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">)))</span>
+                <span class="k">raise</span> <span class="n">e</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">item</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher._get_registered_users">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._get_registered_users">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_registered_users</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieving the users currently registered in GeoNode</span>
+<span class="sd">        :return: users count</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">User</span> <span class="o">=</span> <span class="n">get_user_model</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">User</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher._get_layers">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._get_layers">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_layers</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieving all the existing datasets</span>
+<span class="sd">        :return: datasets count</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Dataset</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher._get_maps">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._get_maps">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_maps</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieving all the existing maps</span>
+<span class="sd">        :return: maps count</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Map</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher._get_documents">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._get_documents">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_documents</span><span class="p">():</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieving all the existing documents</span>
+<span class="sd">        :return: documents count</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Document</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">count</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="LogstashDispatcher._get_errors">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._get_errors">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Retrieving errors</span>
+<span class="sd">        :return: errors count</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ExceptionsListView</span><span class="p">()</span><span class="o">.</span><span class="n">get_queryset</span><span class="p">(</span>
+            <span class="n">valid_to</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_valid_to</span><span class="p">,</span>
+            <span class="n">valid_from</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_valid_from</span><span class="p">,</span>
+            <span class="n">interval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_interval</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span></div>
+
+
+    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="LogstashDispatcher._get_country_center">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher._get_country_center">[docs]</a>
+    <span class="k">def</span> <span class="nf">_get_country_center</span><span class="p">(</span><span class="n">iso_3</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">_cnt</span> <span class="ow">in</span> <span class="n">COUNTRIES_GEODB</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">iso_3</span> <span class="o">==</span> <span class="n">_cnt</span><span class="p">[</span><span class="s1">&#39;country.iso_3&#39;</span><span class="p">]:</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">_cnt</span><span class="p">[</span><span class="s1">&#39;country.center&#39;</span><span class="p">]]</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">output</span></div>
+
+
+<div class="viewcode-block" id="LogstashDispatcher.test_dispatch">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.LogstashDispatcher.test_dispatch">[docs]</a>
+    <span class="k">def</span> <span class="nf">test_dispatch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Testing connection to the centralized server</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="p">:</span>
+            <span class="n">test_msg</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;format_version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;instance&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">HOSTNAME</span><span class="p">,</span>
+                    <span class="s2">&quot;ip&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">client_ip</span><span class="p">,</span>
+                <span class="p">},</span>
+                <span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;test&quot;</span>
+            <span class="p">}</span>
+            <span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="n">constants</span><span class="o">.</span><span class="n">SOCKET_TIMEOUT</span><span class="p">)</span>
+            <span class="n">test_host</span> <span class="o">=</span> <span class="n">host</span> <span class="k">if</span> <span class="n">host</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">host</span>
+            <span class="n">test_port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span> <span class="k">if</span> <span class="n">port</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">_centralized_server</span><span class="o">.</span><span class="n">port</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">test_host</span><span class="p">,</span> <span class="n">test_port</span><span class="p">))</span>
+            <span class="n">compressed_msg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handler</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">json_gzip</span><span class="p">(</span><span class="n">test_msg</span><span class="p">)</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="n">compressed_msg</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GeonodeAsynchronousLogstashHandler">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler">[docs]</a>
+<span class="k">class</span> <span class="nc">GeonodeAsynchronousLogstashHandler</span><span class="p">(</span><span class="n">AsynchronousLogstashHandler</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends AsynchronousLogstashHandler to allow gzip compression</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeonodeAsynchronousLogstashHandler</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="viewcode-block" id="GeonodeAsynchronousLogstashHandler.formatter">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler.formatter">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="n">GeonodeLogstashFormatter</span><span class="p">(</span><span class="n">gzip</span><span class="o">=</span><span class="n">GZIP_COMPRESSED</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GeonodeAsynchronousLogstashHandler._start_worker_thread">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler._start_worker_thread">[docs]</a>
+    <span class="k">def</span> <span class="nf">_start_worker_thread</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Super method override to use GeonodeLogProcessingWorker</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_thread_is_running</span><span class="p">():</span>
+            <span class="k">return</span>
+        <span class="n">AsynchronousLogstashHandler</span><span class="o">.</span><span class="n">_worker_thread</span> <span class="o">=</span> <span class="n">GeonodeLogProcessingWorker</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_port</span><span class="p">,</span>
+            <span class="n">transport</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_transport</span><span class="p">,</span>
+            <span class="n">ssl_enable</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssl_enable</span><span class="p">,</span>
+            <span class="n">ssl_verify</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ssl_verify</span><span class="p">,</span>
+            <span class="n">keyfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_keyfile</span><span class="p">,</span>
+            <span class="n">certfile</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_certfile</span><span class="p">,</span>
+            <span class="n">ca_certs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_ca_certs</span><span class="p">,</span>
+            <span class="n">database_path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_database_path</span><span class="p">,</span>
+            <span class="n">cache</span><span class="o">=</span><span class="n">EVENT_CACHE</span><span class="p">,</span>
+            <span class="n">event_ttl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_ttl</span><span class="p">)</span>
+        <span class="n">AsynchronousLogstashHandler</span><span class="o">.</span><span class="n">_worker_thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="GeonodeAsynchronousLogstashHandler._format_record">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler._format_record">[docs]</a>
+    <span class="k">def</span> <span class="nf">_format_record</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Super method overriding to allow gzip compression</span>
+<span class="sd">        :param record: message to be formatted</span>
+<span class="sd">        :return: formatted message</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_create_formatter_if_necessary</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">record</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GeonodeAsynchronousLogstashHandler.get_last_entry_date">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeAsynchronousLogstashHandler.get_last_entry_date">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_last_entry_date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get entry date of the last queued event</span>
+<span class="sd">        :return: Events</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_thread_is_running</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_worker_thread</span><span class="o">.</span><span class="n">get_last_queued_event_date</span><span class="p">()</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GeonodeLogstashFormatter">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeLogstashFormatter">[docs]</a>
+<span class="k">class</span> <span class="nc">GeonodeLogstashFormatter</span><span class="p">(</span><span class="n">LogstashFormatter</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends LogstashFormatter to allow gzip compression</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gzip</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">GeonodeLogstashFormatter</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="viewcode-block" id="GeonodeLogstashFormatter._gzip">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeLogstashFormatter._gzip">[docs]</a>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_gzip</span> <span class="o">=</span> <span class="n">gzip</span></div>
+
+
+<div class="viewcode-block" id="GeonodeLogstashFormatter.format">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeLogstashFormatter.format">[docs]</a>
+    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">record</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Super method overriding to allow json compression</span>
+<span class="sd">        :param record: message</span>
+<span class="sd">        :return: gzip compressed message</span>
+<span class="sd">        :ref: https://stackoverflow.com/questions/8506897/how-do-i-gzip-compress-a-string-in-python</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_serialize</span><span class="p">(</span><span class="n">record</span><span class="o">.</span><span class="n">msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">_output</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">_output</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;No record.msg content found!&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gzip</span><span class="p">:</span>
+            <span class="n">_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">json_gzip</span><span class="p">(</span><span class="n">_output</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_output</span></div>
+
+
+<div class="viewcode-block" id="GeonodeLogstashFormatter.json_gzip">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeLogstashFormatter.json_gzip">[docs]</a>
+    <span class="k">def</span> <span class="nf">json_gzip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gzip compression of serialized json</span>
+<span class="sd">        :param j: input json to be compressed</span>
+<span class="sd">        :return: compressed object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gzip_j</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">_out</span> <span class="o">=</span> <span class="n">BytesIO</span><span class="p">()</span>
+                <span class="k">with</span> <span class="n">gzip</span><span class="o">.</span><span class="n">GzipFile</span><span class="p">(</span><span class="n">fileobj</span><span class="o">=</span><span class="n">_out</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;wb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fout</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">six</span><span class="o">.</span><span class="n">string_types</span><span class="p">):</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                    <span class="n">fout</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+                    <span class="n">fout</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+                <span class="n">gzip_j</span> <span class="o">=</span> <span class="n">sqlite3</span><span class="o">.</span><span class="n">Binary</span><span class="p">(</span><span class="n">_out</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+                <span class="n">log</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">gzip_j</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GeonodeTcpTransport">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeTcpTransport">[docs]</a>
+<span class="k">class</span> <span class="nc">GeonodeTcpTransport</span><span class="p">(</span><span class="n">TcpTransport</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends TcpTransport to avoid loss of messages</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GeonodeTcpTransport._send">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeTcpTransport._send">[docs]</a>
+    <span class="k">def</span> <span class="nf">_send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">events</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Super method override to avoid loss of messages</span>
+<span class="sd">        :param events: events to be processed</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">events</span><span class="p">:</span>
+            <span class="c1"># To avoid loss of messages we need a short sleep, see the following issues:</span>
+            <span class="c1"># https://github.com/eht16/python-logstash-async/issues/22</span>
+            <span class="c1"># https://github.com/eht16/python-logstash-async/issues/33</span>
+            <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_send_via_socket</span><span class="p">(</span><span class="n">event</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GeonodeLogProcessingWorker">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeLogProcessingWorker">[docs]</a>
+<span class="k">class</span> <span class="nc">GeonodeLogProcessingWorker</span><span class="p">(</span><span class="n">LogProcessingWorker</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends LogProcessingWorker to use GeonodeDatabaseCache</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GeonodeLogProcessingWorker._setup_database">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeLogProcessingWorker._setup_database">[docs]</a>
+    <span class="k">def</span> <span class="nf">_setup_database</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ovverride of the super method to use GeonodeDatabaseCache</span>
+<span class="sd">        :return: None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database_path</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_database</span> <span class="o">=</span> <span class="n">GeonodeDatabaseCache</span><span class="p">(</span>
+                <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_database_path</span><span class="p">,</span> <span class="n">event_ttl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_ttl</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_database</span> <span class="o">=</span> <span class="n">MemoryCache</span><span class="p">(</span>
+                <span class="n">cache</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_memory_cache</span><span class="p">,</span> <span class="n">event_ttl</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_event_ttl</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="GeonodeLogProcessingWorker.get_last_queued_event_date">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeLogProcessingWorker.get_last_queued_event_date">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_last_queued_event_date</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the entry date of the last queued event</span>
+<span class="sd">        :return: last event entry date</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">query_fetch</span> <span class="o">=</span> <span class="s2">&quot;SELECT `entry_date` FROM `event` ORDER BY `entry_date` DESC LIMIT 1;&quot;</span>
+        <span class="n">queued_events_dates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_database</span><span class="o">.</span><span class="n">get_from_query</span><span class="p">(</span><span class="n">query_fetch</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">queued_events_dates</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">queued_events_dates</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s2">&quot;entry_date&quot;</span><span class="p">]</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="GeonodeDatabaseCache">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeDatabaseCache">[docs]</a>
+<span class="k">class</span> <span class="nc">GeonodeDatabaseCache</span><span class="p">(</span><span class="n">DatabaseCache</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extends DatabaseCache to have more method</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="GeonodeDatabaseCache.get_from_query">
+<a class="viewcode-back" href="../../autoapi/geonode_logstash/logstash/index.html#geonode_logstash.logstash.GeonodeDatabaseCache.get_from_query">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_from_query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">query_fetch</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method to execute query and retrieve results</span>
+<span class="sd">        :return: query results</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_connect</span><span class="p">()</span> <span class="k">as</span> <span class="n">connection</span><span class="p">:</span>
+            <span class="n">cursor</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">cursor</span><span class="p">()</span>
+            <span class="n">cursor</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">query_fetch</span><span class="p">)</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="n">cursor</span><span class="o">.</span><span class="n">fetchall</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">results</span></div>
+</div>
+
+
+
+<span class="n">constants</span><span class="o">.</span><span class="n">SOCKET_TIMEOUT</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">get_socket_timeout</span><span class="p">()</span>
+<span class="n">constants</span><span class="o">.</span><span class="n">QUEUE_CHECK_INTERVAL</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">get_queue_check_interval</span><span class="p">()</span>
+<span class="n">constants</span><span class="o">.</span><span class="n">QUEUED_EVENTS_FLUSH_INTERVAL</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">get_queue_events_flush_interval</span><span class="p">()</span>
+<span class="n">constants</span><span class="o">.</span><span class="n">QUEUED_EVENTS_FLUSH_COUNT</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">get_queue_events_flush_count</span><span class="p">()</span>
+<span class="n">constants</span><span class="o">.</span><span class="n">QUEUED_EVENTS_BATCH_SIZE</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">get_queue_events_batch_size</span><span class="p">()</span>
+<span class="n">constants</span><span class="o">.</span><span class="n">DATABASE_TIMEOUT</span> <span class="o">=</span> <span class="n">LogstashDispatcher</span><span class="o">.</span><span class="n">get_logstash_db_timeout</span><span class="p">()</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Kan Territory &amp; IT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

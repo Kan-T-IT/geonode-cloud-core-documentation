@@ -1,0 +1,4 @@
+[submodule "geonode-cloud-core"]
+	path = geonode-cloud-core
+	url = https://github.com/Kan-T-IT/geonode-cloud-core.git
+        branch = doc
